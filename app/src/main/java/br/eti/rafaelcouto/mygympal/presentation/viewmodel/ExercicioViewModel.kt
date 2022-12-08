@@ -34,13 +34,6 @@ class ExercicioViewModel @Inject constructor(
         )
 
         useCase.salvaExercicio(exercicio)
-
-        nomeExercicio = ""
-        numSeries = ""
-        minRepeticoes = ""
-        maxRepeticoes = ""
-        carga = ""
-        podeContinuar = false
     }
 
     fun validaBotao() {
@@ -50,5 +43,14 @@ class ExercicioViewModel @Inject constructor(
                 maxRepeticoes.toIntOrZero() > 0 &&
                 maxRepeticoes.toIntOrZero() >= minRepeticoes.toIntOrZero() &&
                 carga.toIntOrZero() > 0
+    }
+
+    fun resetaDados() {
+        nomeExercicio = ""
+        numSeries = ""
+        minRepeticoes = ""
+        maxRepeticoes = ""
+        carga = ""
+        podeContinuar = false
     }
 }

@@ -19,24 +19,28 @@ class ExerciciosViewModel @Inject constructor(
 ) : ViewModel() {
 
     var idGrupo by mutableStateOf(0L)
-    var nomeGrupo by mutableStateOf("")
 
     fun carregaGrupo(): Flow<Grupo> = flow {
         if (idGrupo != 0L) emit(grupoUseCase.localizaGrupo(idGrupo))
     }
 
-    fun excluiGrupo() {
+    suspend fun excluiGrupo() {
         if (idGrupo != 0L) {
             val grupo = grupoUseCase.localizaGrupo(idGrupo)
-            grupoUseCase.excluiGrupo(grupo)
-        }
-    }
 
-    fun atualizaGrupo() {
-        if (idGrupo != 0L && nomeGrupo.trim().isNotEmpty()) {
-            val grupo = grupoUseCase.localizaGrupo(idGrupo)
-            val novoGrupo = Grupo(id = grupo.id, nome = nomeGrupo)
-            grupoUseCase.alteraGrupo(novoGrupo)
+            grupoUseCase.listaGrupos().map { grupos ->
+                grupos.filter { it.value.id == grupo.id }.first()
+            }.collect {
+                if (it.value.ultimo) {
+                    val novoUltimo = it.next?.value
+                    novoUltimo?.let { nu ->
+                        nu.ultimo = true
+                        grupoUseCase.alteraGrupo(nu)
+                    }
+                }
+
+                grupoUseCase.excluiGrupo(grupo)
+            }
         }
     }
 

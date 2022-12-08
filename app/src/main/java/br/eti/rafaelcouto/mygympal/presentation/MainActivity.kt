@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,6 +52,9 @@ class MainActivity : ComponentActivity() {
             NavHost(navController, startDestination = "grupos") {
                 composable(route = "grupos") { GruposScreen(navController = navController) }
                 composable(route = "grupo") { GrupoScreen(navController = navController) }
+                composable(
+                    route = "grupo/{idGrupo}", arguments = listOf(navArgument("idGrupo") { type = NavType.LongType })
+                ) { GrupoScreen(navController = navController, idGrupo = it.arguments?.getLong("idGrupo")) }
                 composable(
                     route = "{idGrupo}/exercicios",
                     arguments = listOf(navArgument("idGrupo") { type = NavType.LongType })
@@ -139,10 +140,14 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun GrupoScreen(navController: NavController) {
+    fun GrupoScreen(navController: NavController, idGrupo: Long? = null) {
         val viewModel: GrupoViewModel by viewModels()
+        viewModel.resetaDados()
+
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
+
+        idGrupo?.let { viewModel.carregaGrupo(it) }
 
         Scaffold(topBar = {
             TopAppBar(
@@ -180,7 +185,11 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.salvaGrupo()
-                                Toast.makeText(context, "Grupo criado!", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    context,
+                                    if (idGrupo == null) "Grupo criado!" else "Grupo atualizado!",
+                                    Toast.LENGTH_LONG
+                                ).show()
                                 navController.popBackStack()
                             }
                         }, enabled = viewModel.habilitaBotao) {
@@ -213,6 +222,7 @@ class MainActivity : ComponentActivity() {
         val exercicios: List<Exercicio.UI> by awareFlow.collectAsState(initial = emptyList())
         val grupo: Grupo by grupoAwareFlow.collectAsState(initial = Grupo(0, "Exercícios"))
         var podeConcluir by remember { mutableStateOf(true) }
+        var exibeMenu by remember { mutableStateOf(false) }
 
         Scaffold(topBar = {
             TopAppBar(
@@ -222,7 +232,7 @@ class MainActivity : ComponentActivity() {
                         Icon(Icons.Filled.ArrowBack, "Voltar")
                     }
                 }, actions = {
-                    if (exercicios.isNotEmpty())
+                    if (exercicios.isNotEmpty()) {
                         IconButton(
                             enabled = podeConcluir,
                             onClick = {
@@ -235,6 +245,31 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Icon(Icons.Filled.Done, "Concluir grupo")
                         }
+                    }
+
+                    IconButton(onClick = { exibeMenu = !exibeMenu }) {
+                        Icon(Icons.Filled.MoreVert, "Opções")
+                    }
+
+                    DropdownMenu(
+                        expanded = exibeMenu,
+                        onDismissRequest = { exibeMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Editar") },
+                            onClick = { navController.navigate("grupo/$idGrupo") }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Excluir") },
+                            onClick = {
+                                coroutineScope.launch {
+                                    viewModel.excluiGrupo()
+                                    navController.popBackStack("grupos", false)
+                                    Toast.makeText(context, "Grupo excluído!", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        )
+                    }
                 }
             )
         }, content = { paddingValues ->
@@ -388,6 +423,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ExercicioScreen(idGrupo: Long, navController: NavController) {
         val viewModel: ExercicioViewModel by viewModels()
+        viewModel.resetaDados()
+
         val context = LocalContext.current
 
         Scaffold(topBar = {
