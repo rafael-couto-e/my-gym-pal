@@ -1,5 +1,45 @@
 <resources>
     <string name="app_name">My Gym Pal</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="home_titulo">Meus treinos</string>
+    <string name="cad_grupo_content_description">Cadastrar grupo</string>
+    <string name="menu_opcoes">Opções</string>
+    <string name="home_vazio_msg">Não há grupos cadastrados</string>
+    <string name="cad_grupo_titulo">Criar grupo</string>
+    <string name="edit_grupo_titulo">Editar grupo</string>
+    <string name="cad_grupo_campo_nome">Nome do grupo</string>
+    <string name="cad_grupo_salvar">Salvar grupo</string>
+    <string name="cad_grupo_sucesso">Grupo criado!</string>
+    <string name="edit_grupo_sucesso">Grupo atualizado!</string>
+    <string name="lista_exercicios_titulo_padrao">Exercícios</string>
+    <string name="lista_exercicios_titulo">Exercícios - %1$s</string>
+    <string name="concluir_grupo_content_description">Concluir grupo</string>
+    <string name="concluir_grupo_sucesso">Grupo concluído!</string>
+    <string name="grupo_menu_edit">Editar</string>
+    <string name="grupo_menu_delete">Excluir</string>
+    <string name="grupo_delete_sucesso">Grupo excluído!</string>
+    <string name="cad_exercicio_content_description">Cadastrar exercício</string>
+    <string name="exercicios_vazio_msg">Não há exercícios cadastrados</string>
+    <string name="exercicio_reps">%1$d x %2$d</string>
+    <string name="exercicio_reps_min_max">%1$d x %2$d - %3$d</string>
+    <string name="edit_exercicio_content_description">Editar exercício</string>
+    <string name="aumentar_carga">+</string>
+    <string name="reduzir_carga">-</string>
+    <string name="carga_reduzida_sucesso">Carga reduzida</string>
+    <string name="carga_aumentada_sucesso">Carga aumentada</string>
+    <string name="carga_kg">%1$dkg</string>
+    <string name="concluir_exercicio_sucesso">Exercício concluído!</string>
+    <string name="cad_exercicio_titulo">Criar exercício</string>
+    <string name="edit_exercicio_titulo">Editar exercício</string>
+    <string name="exclui_exercicio_sucesso">Exercício excluído!</string>
+    <string name="exclui_exercicio_content_description">Excluir exercício</string>
+    <string name="cad_exercicio_campo_nome">Nome do exercício</string>
+    <string name="cad_exercicio_campo_series">Número de séries</string>
+    <string name="cad_exercicio_campo_min_rep">Mín. repetições</string>
+    <string name="cad_exercicio_campo_max_rep">Máx. repetições</string>
+    <string name="cad_exercicio_campo_carga">Carga</string>
+    <string name="cad_exercicio_salvar">Salvar exercício</string>
+    <string name="cad_exercicio_sucesso">Exercício cadastrado!</string>
+    <string name="edit_exercicio_sucesso">Exercício atualizado!</string>
+    <string name="voltar_content_description">Voltar</string>
 </resources>

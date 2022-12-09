@@ -19,10 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.navigation.NavController
@@ -31,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.eti.rafaelcouto.mygympal.R
 import br.eti.rafaelcouto.mygympal.data.structure.CircularLinkedList
 import br.eti.rafaelcouto.mygympal.domain.model.Exercicio
 import br.eti.rafaelcouto.mygympal.domain.model.Grupo
@@ -45,41 +47,87 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        object Rotas {
+            const val LISTA_GRUPOS = "grupos"
+            const val CAD_GRUPO = "grupo"
+            val EDIT_GRUPO = "grupo/{${Args.ID_GRUPO}}"
+
+            val LISTA_EXERCICIOS = "{${Args.ID_GRUPO}}/exercicios"
+            val CAD_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio"
+            val EDIT_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio/{${Args.ID_EXERCICIO}}"
+
+            fun listaExercicios(idGrupo: Long) = "$idGrupo/exercicios"
+            fun editGrupo(idGrupo: Long) = "grupo/$idGrupo"
+            fun cadExercicio(idGrupo: Long) = "$idGrupo/exercicio"
+            fun editExercicio(idGrupo: Long, idExercicio: Long) = "$idGrupo/exercicio/$idExercicio"
+        }
+
+        object Args {
+            const val ID_GRUPO = "idGrupo"
+            const val ID_EXERCICIO = "idExercicio"
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             val navController = rememberNavController()
-            NavHost(navController, startDestination = "grupos") {
-                composable(route = "grupos") { GruposScreen(navController = navController) }
-                composable(route = "grupo") { GrupoScreen(navController = navController) }
-                composable(
-                    route = "grupo/{idGrupo}", arguments = listOf(navArgument("idGrupo") { type = NavType.LongType })
-                ) { GrupoScreen(navController = navController, idGrupo = it.arguments?.getLong("idGrupo")) }
-                composable(
-                    route = "{idGrupo}/exercicios",
-                    arguments = listOf(navArgument("idGrupo") { type = NavType.LongType })
-                ) {
-                    ExerciciosScreen(idGrupo = it.arguments?.getLong("idGrupo") ?: 0L, navController = navController)
+
+            NavHost(navController, startDestination = Rotas.LISTA_GRUPOS) {
+                composable(route = Rotas.LISTA_GRUPOS) {
+                    GruposScreen(navController = navController)
+                }
+                composable(route = Rotas.CAD_GRUPO) {
+                    GrupoScreen(navController = navController)
                 }
                 composable(
-                    route = "{idGrupo}/exercicio",
-                    arguments = listOf(navArgument("idGrupo") { type = NavType.LongType })
-                ) {
-                    ExercicioScreen(idGrupo = it.arguments?.getLong("idGrupo") ?: 0L, navController = navController)
-                }
-                composable(
-                    route = "{idGrupo}/exercicio/{idExercicio}",
+                    route = Rotas.EDIT_GRUPO,
                     arguments = listOf(
-                        navArgument("idGrupo") { type = NavType.LongType },
-                        navArgument("idExercicio") { type = NavType.LongType }
-                    )
-                ) {
-                    ExercicioScreen(
-                        idGrupo = it.arguments?.getLong("idGrupo") ?: 0L,
-                        navController = navController,
-                        idExercicio = it.arguments?.getLong("idExercicio")
-                    )
-                }
+                        navArgument(Args.ID_GRUPO) { type = NavType.LongType }
+                    ), content = {
+                        GrupoScreen(
+                            navController = navController,
+                            idGrupo = it.arguments?.getLong(Args.ID_GRUPO)
+                        )
+                    }
+                )
+                composable(
+                    route = Rotas.LISTA_EXERCICIOS,
+                    arguments = listOf(
+                        navArgument(Args.ID_GRUPO) { type = NavType.LongType }
+                    ), content = {
+                        ExerciciosScreen(
+                            idGrupo = it.arguments?.getLong(Args.ID_GRUPO) ?: 0L,
+                            navController = navController
+                        )
+                    }
+                )
+                composable(
+                    route = Rotas.CAD_EXERCICIO,
+                    arguments = listOf(
+                        navArgument(Args.ID_GRUPO) { type = NavType.LongType }
+                    ), content = {
+                        ExercicioScreen(
+                            idGrupo = it.arguments?.getLong(Args.ID_GRUPO) ?: 0L,
+                            navController = navController
+                        )
+                    }
+                )
+                composable(
+                    route = Rotas.EDIT_EXERCICIO,
+                    arguments = listOf(
+                        navArgument(Args.ID_GRUPO) { type = NavType.LongType },
+                        navArgument(Args.ID_EXERCICIO) { type = NavType.LongType }
+                    ), content = {
+                        ExercicioScreen(
+                            idGrupo = it.arguments?.getLong(Args.ID_GRUPO) ?: 0L,
+                            navController = navController,
+                            idExercicio = it.arguments?.getLong(Args.ID_EXERCICIO)
+                        )
+                    }
+                )
             }
         }
     }
@@ -94,50 +142,48 @@ class MainActivity : ComponentActivity() {
 
         val grupos: CircularLinkedList<Grupo> by awareFlow.collectAsState(initial = CircularLinkedList())
 
-        Scaffold(
-            topBar = {
-                TopAppBar(title = { Text(text = "Meus treinos") },)
+        MyGymPalScreen(
+            navController = navController,
+            title = stringResource(id = R.string.home_titulo),
+            withBackButton = false,
+            fab = {
+                FloatingActionButton(onClick = { navController.navigate(Rotas.CAD_GRUPO) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.cad_grupo_content_description)
+                    )
+                }
             }, content = { paddingValues ->
-                EmptyGrupos(
+                EmptyMessage(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-                    visible = grupos.isEmpty()
+                    visible = grupos.isEmpty(),
+                    text = stringResource(id = R.string.home_vazio_msg)
                 )
                 ListGrupos(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
                     grupos = grupos,
                     navController = navController
                 )
-            }, floatingActionButton = {
-                FloatingActionButton(onClick = { navController.navigate("grupo") }) {
-                    Icon(Icons.Filled.Add, "Cadastrar grupo")
-                }
-            }, floatingActionButtonPosition = FabPosition.End
-        )
-    }
-
-    @Composable
-    fun EmptyGrupos(modifier: Modifier, visible: Boolean) {
-        if (visible) {
-            Box(modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center) {
-                Text(text = "Não há grupos cadastrados")
             }
-        }
+        )
     }
 
     @Composable
     fun ListGrupos(modifier: Modifier, grupos: CircularLinkedList<Grupo>, navController: NavController) {
         if (grupos.isNotEmpty()) {
-            LazyColumn(modifier = modifier.fillMaxSize()) {
-                items(grupos.size) { index ->
-                    val grupo = grupos[index].value
-                    GrupoItem(
-                        modifier = Modifier.clickable {
-                            navController.navigate("${grupo.id}/exercicios")
-                        }, grupo = grupo
-                    )
+            LazyColumn(
+                modifier = modifier,
+                content = {
+                    items(grupos.size) { index ->
+                        val grupo = grupos[index].value
+                        GrupoItem(
+                            modifier = Modifier.clickable {
+                                navController.navigate(route = Rotas.listaExercicios(idGrupo = grupo.id))
+                            }, grupo = grupo
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 
@@ -146,7 +192,10 @@ class MainActivity : ComponentActivity() {
         Text(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_m),
+                    vertical = dimensionResource(id = R.dimen.padding_p)
+                )
                 .background(color = if (grupo.ultimo) Color.LightGray else Color.Transparent),
             text = grupo.nome
         )
@@ -159,28 +208,23 @@ class MainActivity : ComponentActivity() {
 
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
+        val msgSucesso = stringResource(
+            id = if (idGrupo == null) R.string.cad_grupo_sucesso else R.string.edit_grupo_sucesso
+        )
 
         idGrupo?.let { viewModel.carregaGrupo(it) }
 
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text(text = if (idGrupo == null) "Criar grupo" else "Editar grupo") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Voltar")
-                    }
-                }
-            )
-        }, content = { paddingValues ->
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())) {
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)) {
-                        FormItem(
+        MyGymPalScreen(
+            navController = navController,
+            title = stringResource(id = if (idGrupo == null) R.string.cad_grupo_titulo else R.string.edit_grupo_titulo),
+            withBackButton = true,
+            content = { paddingValues ->
+                BottomButtonColumn(
+                    paddingValues = paddingValues,
+                    content = {
+                        TextField(
                             value = viewModel.nomeGrupo,
-                            label = "Nome do grupo",
+                            label = stringResource(id = R.string.cad_grupo_campo_nome),
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Words,
                                 imeAction = ImeAction.Done
@@ -189,28 +233,19 @@ class MainActivity : ComponentActivity() {
                                 viewModel.habilitaBotao = it.isNotBlank()
                             }
                         )
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        onClick = {
-                            coroutineScope.launch {
-                                viewModel.salvaGrupo()
-                                Toast.makeText(
-                                    context,
-                                    if (idGrupo == null) "Grupo criado!" else "Grupo atualizado!",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                navController.popBackStack()
-                            }
-                        }, enabled = viewModel.habilitaBotao) {
-                        Text(text = "Salvar grupo")
+                    },
+                    buttonTitle = stringResource(id = R.string.cad_grupo_salvar),
+                    buttonEnabled = viewModel.habilitaBotao,
+                    buttonClick = {
+                        coroutineScope.launch {
+                            viewModel.salvaGrupo()
+                            Toast.makeText(context, msgSucesso, Toast.LENGTH_LONG).show()
+                            navController.popBackStack()
+                        }
                     }
-                }
+                )
             }
-        })
+        )
     }
 
     @Composable
@@ -219,99 +254,88 @@ class MainActivity : ComponentActivity() {
         viewModel.idGrupo = idGrupo
 
         val owner = LocalLifecycleOwner.current
-
-        val flow = viewModel.listaExercicios(idGrupo)
-        val awareFlow = remember(flow, owner) {
-            flow.flowWithLifecycle(owner.lifecycle, Lifecycle.State.STARTED)
-        }
-
-        val grupoFlow = viewModel.carregaGrupo()
-        val grupoAwareFlow = remember(grupoFlow, owner) {
-            grupoFlow.flowWithLifecycle(owner.lifecycle, Lifecycle.State.STARTED)
-        }
-
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
-        val exercicios: List<Exercicio.UI> by awareFlow.collectAsState(initial = emptyList())
-        val grupo: Grupo by grupoAwareFlow.collectAsState(initial = Grupo(0, "Exercícios"))
+
+        val exercicios = viewModel.listaExercicios(idGrupo).collectAsStateWithLifecycle(
+            owner = owner,
+            initial = emptyList()
+        )
+        val grupo = viewModel.carregaGrupo().collectAsStateWithLifecycle(
+            owner = owner,
+            initial = Grupo(0, stringResource(id = R.string.lista_exercicios_titulo_padrao))
+        )
+
         var podeConcluir by remember { mutableStateOf(true) }
-        var exibeMenu by remember { mutableStateOf(false) }
+        val msgSucessoConcluir = stringResource(id = R.string.concluir_grupo_sucesso)
+        val msgSucessoExcluir = stringResource(id = R.string.grupo_delete_sucesso)
 
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text(text = "Exercícios - ${grupo.nome}") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Voltar")
-                    }
-                }, actions = {
-                    if (exercicios.isNotEmpty()) {
-                        IconButton(
-                            enabled = podeConcluir,
-                            onClick = {
-                                coroutineScope.launch {
-                                    viewModel.concluiGrupo(exercicios)
-                                    Toast.makeText(context, "Grupo concluído!", Toast.LENGTH_LONG).show()
-                                    podeConcluir = false
-                                }
+        MyGymPalScreen(
+            navController = navController,
+            title = stringResource(id = R.string.lista_exercicios_titulo, grupo.nome),
+            withBackButton = true,
+            actions = {
+                if (exercicios.isNotEmpty()) {
+                    IconButton(
+                        enabled = podeConcluir,
+                        onClick = {
+                            coroutineScope.launch {
+                                viewModel.concluiGrupo(exercicios)
+                                Toast.makeText(context, msgSucessoConcluir, Toast.LENGTH_LONG).show()
+                                podeConcluir = false
                             }
-                        ) {
-                            Icon(Icons.Filled.Done, "Concluir grupo")
                         }
-                    }
-
-                    IconButton(onClick = { exibeMenu = !exibeMenu }) {
-                        Icon(Icons.Filled.MoreVert, "Opções")
-                    }
-
-                    DropdownMenu(
-                        expanded = exibeMenu,
-                        onDismissRequest = { exibeMenu = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Editar") },
-                            onClick = { navController.navigate("grupo/$idGrupo") }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Excluir") },
-                            onClick = {
-                                coroutineScope.launch {
-                                    viewModel.excluiGrupo()
-                                    navController.popBackStack("grupos", false)
-                                    Toast.makeText(context, "Grupo excluído!", Toast.LENGTH_LONG).show()
-                                }
-                            }
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = stringResource(id = R.string.concluir_grupo_content_description)
                         )
                     }
                 }
-            )
-        }, content = { paddingValues ->
-            EmptyExercicios(
-                modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-                visible = exercicios.isEmpty()
-            )
-            ListaExercicios(
-                modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-                navController = navController,
-                exercicios = exercicios,
-                viewModel = viewModel,
-                aoConcluir = { podeConcluir = false }
-            )
-        }, floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("$idGrupo/exercicio") }) {
-                Icon(Icons.Filled.Add, "Cadastrar exercício")
-            }
-        }, floatingActionButtonPosition = FabPosition.End)
-    }
 
-    @Composable
-    fun EmptyExercicios(modifier: Modifier, visible: Boolean) {
-        if (visible) {
-            Box(modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center) {
-                Text(text = "Não há exercícios cadastrados")
+                MyGymPalDropdownMenu(
+                    items = {
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.grupo_menu_edit)) },
+                            onClick = { navController.navigate(route = Rotas.editGrupo(idGrupo)) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.grupo_menu_delete)) },
+                            onClick = {
+                                coroutineScope.launch {
+                                    viewModel.excluiGrupo()
+                                    navController.popBackStack(Rotas.LISTA_GRUPOS, false)
+                                    Toast.makeText(context, msgSucessoExcluir, Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        )
+                    }
+                )
+            },
+            fab = {
+                FloatingActionButton(onClick = { navController.navigate(route = Rotas.cadExercicio(idGrupo)) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.cad_exercicio_content_description)
+                    )
+                }
+            },
+            content = { paddingValues ->
+                EmptyMessage(
+                    modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+                    visible = exercicios.isEmpty(),
+                    text = stringResource(id = R.string.exercicios_vazio_msg)
+                )
+                ListaExercicios(
+                    modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+                    navController = navController,
+                    exercicios = exercicios,
+                    viewModel = viewModel,
+                    aoConcluir = { podeConcluir = false }
+                )
+
             }
-        }
+        )
     }
 
     @Composable
@@ -322,13 +346,15 @@ class MainActivity : ComponentActivity() {
         if (exercicios.isNotEmpty()) {
             val mExercicios by remember { mutableStateOf(exercicios) }
             var concluidos by remember { mutableStateOf(mExercicios.map { false }) }
+            val msgSucesso = stringResource(id = R.string.concluir_grupo_sucesso)
 
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
                 content = {
                     items(mExercicios.size) { index ->
+                        val exercicio = mExercicios[index]
                         ExercicioItem(
-                            exercicio = mExercicios[index],
+                            exercicio = exercicio,
                             viewModel = viewModel,
                             aoConcluir = { id ->
                                 val novosConcluidos = mExercicios.mapIndexed { mIndex, item ->
@@ -337,12 +363,11 @@ class MainActivity : ComponentActivity() {
 
                                 concluidos = novosConcluidos
 
-                                if (concluidos.all { it })
-                                    coroutineScope.launch {
-                                        viewModel.concluiGrupo(mExercicios)
-                                        Toast.makeText(context, "Grupo concluído!", Toast.LENGTH_LONG).show()
-                                        aoConcluir()
-                                    }
+                                if (concluidos.all { it }) coroutineScope.launch {
+                                    viewModel.concluiGrupo(mExercicios)
+                                    Toast.makeText(context, msgSucesso, Toast.LENGTH_LONG).show()
+                                    aoConcluir()
+                                }
                             }, navController = navController
                         )
                     }
@@ -351,16 +376,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
+    @Composable // TODO revisar
     fun ExercicioItem(exercicio: Exercicio.UI, viewModel: ExerciciosViewModel, aoConcluir: (Long) -> Unit, navController: NavController) {
         val context = LocalContext.current
         var carga by remember { mutableStateOf(exercicio.original.carga) }
         var podeConcluir by remember { mutableStateOf(true) }
 
+        val msgSucessoDec = stringResource(id = R.string.carga_reduzida_sucesso)
+        val msgSucessoInc = stringResource(id = R.string.carga_aumentada_sucesso)
+        val msgSucessoConcluir = stringResource(id = R.string.concluir_exercicio_sucesso)
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_m),
+                    vertical = dimensionResource(id = R.dimen.padding_p)
+                )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -372,44 +404,66 @@ class MainActivity : ComponentActivity() {
                         .weight(1f),
                     text = exercicio.original.nome
                 )
-                Button(onClick = { navController.navigate("${exercicio.original.idGrupo}/exercicio/${exercicio.original.id}") }) {
-                    Icon(Icons.Filled.Edit, "Editar exercício")
+                Button(onClick = {
+                    navController.navigate(
+                        route = Rotas.editExercicio(
+                            idGrupo = exercicio.original.idGrupo,
+                            idExercicio = exercicio.original.id
+                        )
+                    )
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(id = R.string.edit_exercicio_content_description)
+                    )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)) {
-                    val text = if (exercicio.original.minRepeticoes == exercicio.original.maxRepeticoes) {
-                        "${exercicio.original.numSeries} x ${exercicio.original.minRepeticoes}"
-                    } else {
-                        "${exercicio.original.numSeries} x ${exercicio.original.minRepeticoes} - ${exercicio.original.maxRepeticoes}"
-                    }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    content = {
+                        val text = if (exercicio.original.minRepeticoes == exercicio.original.maxRepeticoes) {
+                            stringResource(
+                                id = R.string.exercicio_reps,
+                                exercicio.original.numSeries,
+                                exercicio.original.minRepeticoes
+                            )
+                        } else {
+                            stringResource(
+                                id = R.string.exercicio_reps_min_max,
+                                exercicio.original.numSeries,
+                                exercicio.original.minRepeticoes,
+                                exercicio.original.maxRepeticoes
+                            )
+                        }
 
-                    Text(modifier = Modifier.fillMaxWidth(), text = text)
-                }
+                        Text(modifier = Modifier.fillMaxWidth(), text = text)
+                    }
+                )
                 Button(
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
                     onClick = {
                         viewModel.reduzCarga(exercicio.original)
                         carga--
-                        Toast.makeText(context, "Carga reduzida", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, msgSucessoDec, Toast.LENGTH_SHORT).show()
                     }
-                ) { Text(text = "-") }
+                ) { Text(text = stringResource(id = R.string.reduzir_carga)) }
                 Text(
-                    modifier = Modifier.padding(end = 16.dp),
-                    text = "${carga}kg"
+                    modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
+                    text = stringResource(id = R.string.carga_kg, carga)
                 )
                 Button(
                     onClick = {
                         viewModel.aumentaCarga(exercicio.original)
                         carga++
-                        Toast.makeText(context, "Carga aumentada", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, msgSucessoInc, Toast.LENGTH_SHORT).show()
                     }
-                ) { Text(text = "+") }
+                ) { Text(text = stringResource(id = R.string.aumentar_carga)) }
             }
             Row {
                 val initial = mutableListOf<Boolean>()
@@ -422,7 +476,7 @@ class MainActivity : ComponentActivity() {
 
                 concluido.forEachIndexed { index, checked ->
                     Checkbox(
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_p)),
                         checked = checked,
                         onCheckedChange = {
                             val list = mutableListOf<Boolean>()
@@ -439,7 +493,7 @@ class MainActivity : ComponentActivity() {
                                 viewModel.concluiExercicio(exercicio = exercicio)
                                 podeConcluir = false
                                 aoConcluir(exercicio.original.id)
-                                Toast.makeText(context, "Exercício concluído!", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, msgSucessoConcluir, Toast.LENGTH_LONG).show()
                             }
                         }, enabled = podeConcluir
                     )
@@ -456,111 +510,189 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         var mIdExercicio by remember { mutableStateOf(idExercicio) }
 
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text(text = if (mIdExercicio == null) "Criar exercício" else "Editar exercício") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Voltar")
-                    }
-                }, actions = {
-                    mIdExercicio?.let {
-                        IconButton(onClick = {
-                            mIdExercicio = null
-                            viewModel.excluiExercicio(it)
-                            Toast.makeText(context, "Exercício excluído!", Toast.LENGTH_LONG).show()
-                            navController.popBackStack()
-                        }) {
-                            Icon(imageVector = Icons.Filled.Delete, contentDescription = "Excluir exercício")
-                        }
+        mIdExercicio?.let { viewModel.carregaExercicio(it) }
+
+        val msgExcluiExercicio = stringResource(id = R.string.exclui_exercicio_sucesso)
+        val msgCadExercicio = stringResource(
+            id = if (idExercicio == null) R.string.cad_exercicio_sucesso else R.string.edit_exercicio_sucesso
+        )
+
+        MyGymPalScreen(
+            navController = navController,
+            title = stringResource(
+                id = if (mIdExercicio == null) R.string.cad_exercicio_titulo else R.string.edit_exercicio_titulo
+            ), withBackButton = true,
+            actions = {
+                mIdExercicio?.let {
+                    IconButton(onClick = {
+                        mIdExercicio = null
+                        viewModel.excluiExercicio(it)
+                        Toast.makeText(context, msgExcluiExercicio, Toast.LENGTH_LONG).show()
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(id = R.string.exclui_exercicio_content_description)
+                        )
                     }
                 }
-            )
-        }, content = { paddingValues ->
-            Column(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = paddingValues.calculateTopPadding())
-                        .weight(1f)
-                ) {
-                    FormItem(
+            }
+        ) { paddingValues ->
+            BottomButtonColumn(
+                paddingValues = paddingValues,
+                content = {
+                    TextField(
                         value = viewModel.nomeExercicio,
-                        label = "Nome do exercício",
+                        label = stringResource(id = R.string.cad_exercicio_campo_nome),
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.nomeExercicio = it
                             viewModel.validaBotao()
                         }
                     )
-                    FormItem(
+                    TextField(
                         value = viewModel.numSeries,
-                        label = "Número de séries",
+                        label = stringResource(id = R.string.cad_exercicio_campo_series),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.numSeries = it
                             viewModel.validaBotao()
                         }
                     )
-                    FormItem(
+                    TextField(
                         value = viewModel.minRepeticoes,
-                        label = "Mín. repetições",
+                        label = stringResource(id = R.string.cad_exercicio_campo_min_rep),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.minRepeticoes = it
                             viewModel.validaBotao()
                         }
                     )
-                    FormItem(
+                    TextField(
                         value = viewModel.maxRepeticoes,
-                        label = "Máx. repetições",
+                        label = stringResource(id = R.string.cad_exercicio_campo_max_rep),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.maxRepeticoes = it
                             viewModel.validaBotao()
                         }
                     )
-                    FormItem(
+                    TextField(
                         value = viewModel.carga,
-                        label = "Carga",
+                        label = stringResource(id = R.string.cad_exercicio_campo_carga),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                         onValueChange = {
                             viewModel.carga = it
                             viewModel.validaBotao()
                         }
                     )
+                }, buttonTitle = stringResource(id = R.string.cad_exercicio_salvar),
+                buttonEnabled = viewModel.podeContinuar,
+                buttonClick =  {
+                    viewModel.salvaExercicio(idGrupo = idGrupo)
+                    Toast.makeText(context, msgCadExercicio, Toast.LENGTH_LONG).show()
+                    navController.popBackStack()
                 }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        onClick = {
-                            viewModel.salvaExercicio(idGrupo = idGrupo)
-                            Toast.makeText(context, if (idExercicio == null) "Exercício cadastrado!" else "Exercício atualizado!", Toast.LENGTH_LONG).show()
-                            navController.popBackStack()
-                        }, enabled = viewModel.podeContinuar) {
-                        Text(text = "Salvar exercício")
-                    }
-                }
-            }
-        })
+            )
+        }
+    }
+
+    // Components
+
+    @Composable
+    fun MyGymPalScreen(navController: NavController,
+                       title: String,
+                       withBackButton: Boolean,
+                       actions: @Composable RowScope.() -> Unit = {},
+                       fab: @Composable () -> Unit = {},
+                       content: @Composable (PaddingValues) -> Unit) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = title) },
+                    navigationIcon = {
+                        if (withBackButton)
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = stringResource(id = R.string.voltar_content_description)
+                                )
+                            }
+                    }, actions = actions
+                )
+            }, content = content,
+            floatingActionButton = fab,
+            floatingActionButtonPosition = FabPosition.End
+        )
     }
 
     @Composable
-    fun FormItem(value: String,
-                 label: String,
-                 keyboardOptions: KeyboardOptions,
-                 onValueChange: (String) -> Unit) {
+    fun MyGymPalDropdownMenu(items: @Composable ColumnScope.() -> Unit) {
+        var exibeMenu by remember { mutableStateOf(false) }
+
+        IconButton(onClick = { exibeMenu = !exibeMenu }) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(id = R.string.menu_opcoes)
+            )
+        }
+
+        DropdownMenu(
+            expanded = exibeMenu,
+            onDismissRequest = { exibeMenu = false },
+            content = items
+        )
+    }
+
+    @Composable
+    fun BottomButtonColumn(paddingValues: PaddingValues, content: @Composable ColumnScope.() -> Unit, buttonTitle: String, buttonEnabled: Boolean, buttonClick: () -> Unit) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .weight(1f),
+                content = content
+            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(dimensionResource(id = R.dimen.padding_m)),
+                    onClick = buttonClick,
+                    enabled = buttonEnabled,
+                    content = { Text(text = buttonTitle) }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun TextField(value: String,
+                  label: String,
+                  keyboardOptions: KeyboardOptions,
+                  onValueChange: (String) -> Unit) {
 
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            label = { Text(text = label) },
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_m),
+                    vertical = dimensionResource(id = R.dimen.padding_p)
+                ), label = { Text(text = label) },
             keyboardOptions = keyboardOptions
         )
+    }
+
+    @Composable
+    fun EmptyMessage(modifier: Modifier, visible: Boolean, text: String) {
+        if (visible) {
+            Box(modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center) {
+                Text(text = text)
+            }
+        }
     }
 }
