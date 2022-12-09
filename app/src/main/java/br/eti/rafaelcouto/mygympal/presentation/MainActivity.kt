@@ -9,7 +9,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -17,13 +19,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.navigation.NavController
@@ -147,7 +153,7 @@ class MainActivity : ComponentActivity() {
             title = stringResource(id = R.string.home_titulo),
             withBackButton = false,
             fab = {
-                FloatingActionButton(onClick = { navController.navigate(Rotas.CAD_GRUPO) }) {
+                Fab(onClick = { navController.navigate(Rotas.CAD_GRUPO) }) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = stringResource(id = R.string.cad_grupo_content_description)
@@ -181,6 +187,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(route = Rotas.listaExercicios(idGrupo = grupo.id))
                             }, grupo = grupo
                         )
+                        Divider(color = colorResource(id = R.color.colorPrimaryAlpha))
                     }
                 }
             )
@@ -189,15 +196,22 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun GrupoItem(modifier: Modifier, grupo: Grupo) {
-        Text(
+        Box(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = dimensionResource(id = R.dimen.padding_m),
-                    vertical = dimensionResource(id = R.dimen.padding_p)
-                )
-                .background(color = if (grupo.ultimo) Color.LightGray else Color.Transparent),
-            text = grupo.nome
+                .background(
+                    color = if (grupo.ultimo) colorResource(id = R.color.mediumGrey) else Color.Transparent
+                ), content = {
+                    Text(
+                        text = grupo.nome,
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = dimensionResource(id = R.dimen.padding_m),
+                                vertical = dimensionResource(id = R.dimen.padding_p)
+                            ), fontWeight = if (grupo.ultimo) FontWeight.Bold else FontWeight.Normal
+                    )
+            }
         )
     }
 
@@ -272,7 +286,7 @@ class MainActivity : ComponentActivity() {
 
         MyGymPalScreen(
             navController = navController,
-            title = stringResource(id = R.string.lista_exercicios_titulo, grupo.nome),
+            title = grupo.nome,
             withBackButton = true,
             actions = {
                 if (exercicios.isNotEmpty()) {
@@ -313,7 +327,7 @@ class MainActivity : ComponentActivity() {
                 )
             },
             fab = {
-                FloatingActionButton(onClick = { navController.navigate(route = Rotas.cadExercicio(idGrupo)) }) {
+                Fab(onClick = { navController.navigate(route = Rotas.cadExercicio(idGrupo)) }) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = stringResource(id = R.string.cad_exercicio_content_description)
@@ -370,13 +384,14 @@ class MainActivity : ComponentActivity() {
                                 }
                             }, navController = navController
                         )
+                        Divider(color = colorResource(id = R.color.colorPrimaryAlpha))
                     }
                 }
             )
         }
     }
 
-    @Composable // TODO revisar
+    @Composable // TODO revisar e marcar checkboxes ao concluir grupo
     fun ExercicioItem(exercicio: Exercicio.UI, viewModel: ExerciciosViewModel, aoConcluir: (Long) -> Unit, navController: NavController) {
         val context = LocalContext.current
         var carga by remember { mutableStateOf(exercicio.original.carga) }
@@ -395,7 +410,9 @@ class MainActivity : ComponentActivity() {
                 )
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = dimensionResource(id = R.dimen.padding_pp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -404,22 +421,22 @@ class MainActivity : ComponentActivity() {
                         .weight(1f),
                     text = exercicio.original.nome
                 )
-                Button(onClick = {
-                    navController.navigate(
-                        route = Rotas.editExercicio(
-                            idGrupo = exercicio.original.idGrupo,
-                            idExercicio = exercicio.original.id
+                RoundedButton(
+                    onClick = {
+                        navController.navigate(
+                            route = Rotas.editExercicio(
+                                idGrupo = exercicio.original.idGrupo,
+                                idExercicio = exercicio.original.id
+                            )
                         )
-                    )
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(id = R.string.edit_exercicio_content_description)
-                    )
-                }
+                    }, imageVector = Icons.Filled.Edit,
+                    contentDescription = stringResource(id = R.string.edit_exercicio_content_description)
+                )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = dimensionResource(id = R.dimen.padding_p)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -445,27 +462,35 @@ class MainActivity : ComponentActivity() {
                         Text(modifier = Modifier.fillMaxWidth(), text = text)
                     }
                 )
-                Button(
+                RoundedButton(
                     modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
                     onClick = {
                         viewModel.reduzCarga(exercicio.original)
                         carga--
                         Toast.makeText(context, msgSucessoDec, Toast.LENGTH_SHORT).show()
-                    }
-                ) { Text(text = stringResource(id = R.string.reduzir_carga)) }
+                    }, imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = stringResource(id = R.string.reduzir_carga_content_description)
+                )
                 Text(
                     modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
                     text = stringResource(id = R.string.carga_kg, carga)
                 )
-                Button(
+                RoundedButton(
                     onClick = {
                         viewModel.aumentaCarga(exercicio.original)
                         carga++
                         Toast.makeText(context, msgSucessoInc, Toast.LENGTH_SHORT).show()
-                    }
-                ) { Text(text = stringResource(id = R.string.aumentar_carga)) }
+                    }, imageVector = Icons.Filled.KeyboardArrowUp,
+                    contentDescription = stringResource(id = R.string.aumentar_carga_content_description)
+                )
             }
-            Row {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = dimensionResource(id = R.dimen.padding_p)
+                    ), verticalAlignment = Alignment.CenterVertically
+            ) {
                 val initial = mutableListOf<Boolean>()
 
                 for (i in 0 until exercicio.original.numSeries) {
@@ -474,10 +499,17 @@ class MainActivity : ComponentActivity() {
 
                 var concluido by remember { mutableStateOf(initial.toList()) }
 
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    text = stringResource(id = R.string.exercicio_series_concluidas)
+                )
                 concluido.forEachIndexed { index, checked ->
-                    Checkbox(
-                        modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_p)),
-                        checked = checked,
+                    MyGymPalCheckbox(
+                        modifier = Modifier.padding(
+                            start = if (index == 0) 0.dp else dimensionResource(id = R.dimen.padding_p)
+                        ), checked = checked,
                         onCheckedChange = {
                             val list = mutableListOf<Boolean>()
 
@@ -618,7 +650,13 @@ class MainActivity : ComponentActivity() {
                                     contentDescription = stringResource(id = R.string.voltar_content_description)
                                 )
                             }
-                    }, actions = actions
+                    }, actions = actions,
+                    colors = TopAppBarDefaults.smallTopAppBarColors(
+                        containerColor = colorResource(id = R.color.colorSecondary),
+                        titleContentColor = colorResource(id = R.color.white),
+                        navigationIconContentColor = colorResource(id = R.color.white),
+                        actionIconContentColor = colorResource(id = R.color.white)
+                    )
                 )
             }, content = content,
             floatingActionButton = fab,
@@ -638,6 +676,7 @@ class MainActivity : ComponentActivity() {
         }
 
         DropdownMenu(
+            modifier = Modifier.background(color = colorResource(id = R.color.lightGrey)),
             expanded = exibeMenu,
             onDismissRequest = { exibeMenu = false },
             content = items
@@ -655,13 +694,10 @@ class MainActivity : ComponentActivity() {
                 content = content
             )
             Row(modifier = Modifier.fillMaxWidth()) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(dimensionResource(id = R.dimen.padding_m)),
-                    onClick = buttonClick,
-                    enabled = buttonEnabled,
-                    content = { Text(text = buttonTitle) }
+                BottomButton(
+                    buttonTitle = buttonTitle,
+                    buttonEnabled = buttonEnabled,
+                    buttonClick = buttonClick
                 )
             }
         }
@@ -682,7 +718,18 @@ class MainActivity : ComponentActivity() {
                     horizontal = dimensionResource(id = R.dimen.padding_m),
                     vertical = dimensionResource(id = R.dimen.padding_p)
                 ), label = { Text(text = label) },
-            keyboardOptions = keyboardOptions
+            keyboardOptions = keyboardOptions,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = colorResource(id = R.color.black),
+                cursorColor = colorResource(id = R.color.colorSecondary),
+                selectionColors = TextSelectionColors(
+                    handleColor = colorResource(id = R.color.darkGrey),
+                    backgroundColor = colorResource(id = R.color.mediumGrey)
+                ), unfocusedLabelColor = colorResource(id = R.color.black),
+                focusedLabelColor = colorResource(id = R.color.colorPrimary),
+                unfocusedBorderColor = colorResource(id = R.color.black),
+                focusedBorderColor = colorResource(id = R.color.colorPrimary)
+            )
         )
     }
 
@@ -693,6 +740,83 @@ class MainActivity : ComponentActivity() {
                 contentAlignment = Alignment.Center) {
                 Text(text = text)
             }
+        }
+    }
+
+    @Composable
+    fun Fab(onClick: () -> Unit, content: @Composable () -> Unit) {
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = colorResource(id = R.color.colorPrimary),
+            contentColor = colorResource(id = R.color.white),
+            content = content
+        )
+    }
+
+    @Composable
+    fun BottomButton(buttonTitle: String, buttonEnabled: Boolean, buttonClick: () -> Unit) {
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(id = R.dimen.padding_m)),
+            onClick = buttonClick,
+            enabled = buttonEnabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.colorPrimary),
+                contentColor = colorResource(id = R.color.white),
+                disabledContainerColor = colorResource(id = R.color.colorPrimaryAlpha),
+                disabledContentColor = colorResource(id = R.color.white)
+            ), content = { Text(text = buttonTitle) }
+        )
+    }
+
+    @Composable
+    fun RoundedButton(
+        modifier: Modifier = Modifier,
+        onClick: () -> Unit,
+        imageVector: ImageVector,
+        contentDescription: String
+    ) {
+        Button(
+            modifier = modifier.size(size = dimensionResource(id = R.dimen.circle_button_size)),
+            onClick = onClick,
+            shape = CircleShape,
+            contentPadding = PaddingValues(0.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.colorPrimary),
+                contentColor = colorResource(id = R.color.white),
+                disabledContainerColor = colorResource(id = R.color.colorPrimaryAlpha),
+                disabledContentColor = colorResource(id = R.color.white)
+            ), content = {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = contentDescription
+                )
+            }
+        )
+    }
+
+    @Composable
+    fun MyGymPalCheckbox(
+        modifier: Modifier = Modifier,
+        checked: Boolean,
+        onCheckedChange: (Boolean) -> Unit,
+        enabled: Boolean
+    ) {
+        CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+            Checkbox(
+                modifier = modifier.padding(
+                    vertical = dimensionResource(id = R.dimen.padding_p)
+                ), checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = enabled,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = colorResource(id = R.color.success),
+                    uncheckedColor = colorResource(id = R.color.colorPrimary),
+                    checkmarkColor = colorResource(id = R.color.white),
+                    disabledCheckedColor = colorResource(id = R.color.successAlpha)
+                )
+            )
         }
     }
 }

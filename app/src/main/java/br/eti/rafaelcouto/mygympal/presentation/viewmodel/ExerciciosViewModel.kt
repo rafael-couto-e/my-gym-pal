@@ -61,8 +61,8 @@ class ExerciciosViewModel @Inject constructor(
             val ultimo = grupos.filter { it.value.ultimo }.firstOrNull()
 
             grupo.value.ultimo = false
-            grupo.next?.value?.ultimo = true
             ultimo?.value?.ultimo = false
+            grupo.next?.value?.ultimo = true
 
             grupoUseCase.alteraGrupo(grupo.value)
 

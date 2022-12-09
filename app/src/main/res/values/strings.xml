@@ -12,7 +12,6 @@
     <string name="cad_grupo_sucesso">Grupo criado!</string>
     <string name="edit_grupo_sucesso">Grupo atualizado!</string>
     <string name="lista_exercicios_titulo_padrao">Exercícios</string>
-    <string name="lista_exercicios_titulo">Exercícios - %1$s</string>
     <string name="concluir_grupo_content_description">Concluir grupo</string>
     <string name="concluir_grupo_sucesso">Grupo concluído!</string>
     <string name="grupo_menu_edit">Editar</string>
@@ -20,11 +19,12 @@
     <string name="grupo_delete_sucesso">Grupo excluído!</string>
     <string name="cad_exercicio_content_description">Cadastrar exercício</string>
     <string name="exercicios_vazio_msg">Não há exercícios cadastrados</string>
-    <string name="exercicio_reps">%1$d x %2$d</string>
-    <string name="exercicio_reps_min_max">%1$d x %2$d - %3$d</string>
+    <string name="exercicio_reps">%1$d x %2$d repetições</string>
+    <string name="exercicio_reps_min_max">%1$d x %2$d - %3$d repetições</string>
+    <string name="exercicio_series_concluidas">Séries concluídas:</string>
     <string name="edit_exercicio_content_description">Editar exercício</string>
-    <string name="aumentar_carga">+</string>
-    <string name="reduzir_carga">-</string>
+    <string name="aumentar_carga_content_description">Aumentar carga</string>
+    <string name="reduzir_carga_content_description">Reduzir carga</string>
     <string name="carga_reduzida_sucesso">Carga reduzida</string>
     <string name="carga_aumentada_sucesso">Carga aumentada</string>
     <string name="carga_kg">%1$dkg</string>
