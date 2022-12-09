@@ -17,6 +17,7 @@ class ExercicioUseCase @Inject constructor(
 
     override fun localizaExercicio(id: Long) = repository.localizaExercicio(id)
     override fun salvaExercicio(exercicio: Exercicio) = repository.salvaExercicio(exercicio)
+    override fun atualizaExercicio(exercicio: Exercicio) = repository.alteraExercicio(exercicio)
     override fun excluiExercicio(exercicio: Exercicio) = repository.excluiExercicio(exercicio)
 
     override fun concluiExercicio(exercicio: Exercicio.UI) {

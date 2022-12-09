@@ -67,6 +67,19 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ExercicioScreen(idGrupo = it.arguments?.getLong("idGrupo") ?: 0L, navController = navController)
                 }
+                composable(
+                    route = "{idGrupo}/exercicio/{idExercicio}",
+                    arguments = listOf(
+                        navArgument("idGrupo") { type = NavType.LongType },
+                        navArgument("idExercicio") { type = NavType.LongType }
+                    )
+                ) {
+                    ExercicioScreen(
+                        idGrupo = it.arguments?.getLong("idGrupo") ?: 0L,
+                        navController = navController,
+                        idExercicio = it.arguments?.getLong("idExercicio")
+                    )
+                }
             }
         }
     }
@@ -151,7 +164,7 @@ class MainActivity : ComponentActivity() {
 
         Scaffold(topBar = {
             TopAppBar(
-                title = { Text(text = "Criar grupo") },
+                title = { Text(text = if (idGrupo == null) "Criar grupo" else "Editar grupo") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack, "Voltar")
@@ -279,6 +292,7 @@ class MainActivity : ComponentActivity() {
             )
             ListaExercicios(
                 modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+                navController = navController,
                 exercicios = exercicios,
                 viewModel = viewModel,
                 aoConcluir = { podeConcluir = false }
@@ -301,22 +315,23 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ListaExercicios(modifier: Modifier, exercicios: List<Exercicio.UI>, viewModel: ExerciciosViewModel, aoConcluir: () -> Unit) {
+    fun ListaExercicios(modifier: Modifier, navController: NavController, exercicios: List<Exercicio.UI>, viewModel: ExerciciosViewModel, aoConcluir: () -> Unit) {
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
 
         if (exercicios.isNotEmpty()) {
-            var concluidos by remember { mutableStateOf(exercicios.map { false }) }
+            val mExercicios by remember { mutableStateOf(exercicios) }
+            var concluidos by remember { mutableStateOf(mExercicios.map { false }) }
 
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
                 content = {
-                    items(exercicios.size) { index ->
+                    items(mExercicios.size) { index ->
                         ExercicioItem(
-                            exercicio = exercicios[index],
+                            exercicio = mExercicios[index],
                             viewModel = viewModel,
                             aoConcluir = { id ->
-                                val novosConcluidos = exercicios.mapIndexed { mIndex, item ->
+                                val novosConcluidos = mExercicios.mapIndexed { mIndex, item ->
                                     item.original.id == id || concluidos[mIndex]
                                 }
 
@@ -324,11 +339,11 @@ class MainActivity : ComponentActivity() {
 
                                 if (concluidos.all { it })
                                     coroutineScope.launch {
-                                        viewModel.concluiGrupo(exercicios)
+                                        viewModel.concluiGrupo(mExercicios)
                                         Toast.makeText(context, "Grupo concluído!", Toast.LENGTH_LONG).show()
                                         aoConcluir()
                                     }
-                            }
+                            }, navController = navController
                         )
                     }
                 }
@@ -337,7 +352,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ExercicioItem(exercicio: Exercicio.UI, viewModel: ExerciciosViewModel, aoConcluir: (Long) -> Unit) {
+    fun ExercicioItem(exercicio: Exercicio.UI, viewModel: ExerciciosViewModel, aoConcluir: (Long) -> Unit, navController: NavController) {
         val context = LocalContext.current
         var carga by remember { mutableStateOf(exercicio.original.carga) }
         var podeConcluir by remember { mutableStateOf(true) }
@@ -347,7 +362,20 @@ class MainActivity : ComponentActivity() {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(text = exercicio.original.nome)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    text = exercicio.original.nome
+                )
+                Button(onClick = { navController.navigate("${exercicio.original.idGrupo}/exercicio/${exercicio.original.id}") }) {
+                    Icon(Icons.Filled.Edit, "Editar exercício")
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -421,18 +449,30 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ExercicioScreen(idGrupo: Long, navController: NavController) {
+    fun ExercicioScreen(idGrupo: Long, navController: NavController, idExercicio: Long? = null) {
         val viewModel: ExercicioViewModel by viewModels()
         viewModel.resetaDados()
 
         val context = LocalContext.current
+        var mIdExercicio by remember { mutableStateOf(idExercicio) }
 
         Scaffold(topBar = {
             TopAppBar(
-                title = { Text(text = "Criar exercício") },
+                title = { Text(text = if (mIdExercicio == null) "Criar exercício" else "Editar exercício") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack, "Voltar")
+                    }
+                }, actions = {
+                    mIdExercicio?.let {
+                        IconButton(onClick = {
+                            mIdExercicio = null
+                            viewModel.excluiExercicio(it)
+                            Toast.makeText(context, "Exercício excluído!", Toast.LENGTH_LONG).show()
+                            navController.popBackStack()
+                        }) {
+                            Icon(imageVector = Icons.Filled.Delete, contentDescription = "Excluir exercício")
+                        }
                     }
                 }
             )
@@ -497,7 +537,7 @@ class MainActivity : ComponentActivity() {
                             .padding(16.dp),
                         onClick = {
                             viewModel.salvaExercicio(idGrupo = idGrupo)
-                            Toast.makeText(context, "Exercício salvo!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, if (idExercicio == null) "Exercício cadastrado!" else "Exercício atualizado!", Toast.LENGTH_LONG).show()
                             navController.popBackStack()
                         }, enabled = viewModel.podeContinuar) {
                         Text(text = "Salvar exercício")

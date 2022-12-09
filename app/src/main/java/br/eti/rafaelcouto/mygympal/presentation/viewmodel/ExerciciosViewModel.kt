@@ -46,11 +46,6 @@ class ExerciciosViewModel @Inject constructor(
 
     fun listaExercicios(idGrupo: Long) = exercicioUseCase.listaExercicios(idGrupo)
 
-    fun excluiExercicio(id: Long) {
-        val exercicio = exercicioUseCase.localizaExercicio(id)
-        exercicioUseCase.excluiExercicio(exercicio)
-    }
-
     fun aumentaCarga(exercicio: Exercicio) {
         exercicioUseCase.aumentaCarga(exercicio)
     }

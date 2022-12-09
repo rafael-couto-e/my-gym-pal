@@ -8,7 +8,6 @@ import br.eti.rafaelcouto.mygympal.domain.model.Exercicio
 import br.eti.rafaelcouto.mygympal.domain.usecase.ExercicioUseCaseAbs
 import br.eti.rafaelcouto.mygympal.presentation.toIntOrZero
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,9 +21,30 @@ class ExercicioViewModel @Inject constructor(
     var maxRepeticoes by mutableStateOf("")
     var carga by mutableStateOf("")
     var podeContinuar by mutableStateOf(false)
+    var idExercicio by mutableStateOf(0L)
+
+    fun carregaExercicio(idExercicio: Long) {
+        this.idExercicio = idExercicio
+        val exercicio = useCase.localizaExercicio(idExercicio)
+
+        nomeExercicio = exercicio.nome
+        numSeries = exercicio.numSeries.toString()
+        minRepeticoes = exercicio.minRepeticoes.toString()
+        maxRepeticoes = exercicio.maxRepeticoes.toString()
+        carga = exercicio.carga.toString()
+        podeContinuar = true
+    }
 
     fun salvaExercicio(idGrupo: Long) {
-        val exercicio = Exercicio(
+        val exercicio = if (idExercicio == 0L) Exercicio(
+            nome = nomeExercicio,
+            numSeries = numSeries.toByte(),
+            minRepeticoes = minRepeticoes.toByte(),
+            maxRepeticoes = maxRepeticoes.toByte(),
+            carga = carga.toShort(),
+            idGrupo = idGrupo
+        ) else Exercicio(
+            id = idExercicio,
             nome = nomeExercicio,
             numSeries = numSeries.toByte(),
             minRepeticoes = minRepeticoes.toByte(),
@@ -33,7 +53,15 @@ class ExercicioViewModel @Inject constructor(
             idGrupo = idGrupo
         )
 
-        useCase.salvaExercicio(exercicio)
+        if (idExercicio == 0L)
+            useCase.salvaExercicio(exercicio)
+        else
+            useCase.atualizaExercicio(exercicio)
+    }
+
+    fun excluiExercicio(id: Long) {
+        val exercicio = useCase.localizaExercicio(id)
+        useCase.excluiExercicio(exercicio)
     }
 
     fun validaBotao() {
@@ -52,5 +80,6 @@ class ExercicioViewModel @Inject constructor(
         maxRepeticoes = ""
         carga = ""
         podeContinuar = false
+        idExercicio = 0L
     }
 }

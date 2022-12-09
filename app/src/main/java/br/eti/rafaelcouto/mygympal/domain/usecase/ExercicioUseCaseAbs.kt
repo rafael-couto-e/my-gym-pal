@@ -8,6 +8,7 @@ interface ExercicioUseCaseAbs {
     fun listaExercicios(idGrupo: Long): Flow<List<Exercicio.UI>>
     fun localizaExercicio(id: Long): Exercicio
     fun salvaExercicio(exercicio: Exercicio)
+    fun atualizaExercicio(exercicio: Exercicio)
     fun excluiExercicio(exercicio: Exercicio)
     fun concluiExercicio(exercicio: Exercicio.UI)
     fun concluiGrupo(exercicios: List<Exercicio.UI>)
