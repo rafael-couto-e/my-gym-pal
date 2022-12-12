@@ -266,6 +266,7 @@ class MainActivity : ComponentActivity() {
     fun ExerciciosScreen(idGrupo: Long, navController: NavController) {
         val viewModel: ExerciciosViewModel by viewModels()
         viewModel.idGrupo = idGrupo
+        viewModel.resetaSeries()
 
         val owner = LocalLifecycleOwner.current
         val coroutineScope = rememberCoroutineScope()
@@ -295,6 +296,7 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.concluiGrupo(exercicios)
+                                viewModel.concluiSeries(exercicios)
                                 Toast.makeText(context, msgSucessoConcluir, Toast.LENGTH_LONG).show()
                                 podeConcluir = false
                             }
@@ -391,11 +393,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable // TODO revisar e marcar checkboxes ao concluir grupo
+    @Composable
     fun ExercicioItem(exercicio: Exercicio.UI, viewModel: ExerciciosViewModel, aoConcluir: (Long) -> Unit, navController: NavController) {
         val context = LocalContext.current
         var carga by remember { mutableStateOf(exercicio.original.carga) }
-        var podeConcluir by remember { mutableStateOf(true) }
+
+        viewModel.iniciaSeriesConcluidas(exercicio = exercicio)
 
         val msgSucessoDec = stringResource(id = R.string.carga_reduzida_sucesso)
         val msgSucessoInc = stringResource(id = R.string.carga_aumentada_sucesso)
@@ -439,28 +442,24 @@ class MainActivity : ComponentActivity() {
                     .padding(top = dimensionResource(id = R.dimen.padding_p)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    content = {
-                        val text = if (exercicio.original.minRepeticoes == exercicio.original.maxRepeticoes) {
-                            stringResource(
-                                id = R.string.exercicio_reps,
-                                exercicio.original.numSeries,
-                                exercicio.original.minRepeticoes
-                            )
-                        } else {
-                            stringResource(
-                                id = R.string.exercicio_reps_min_max,
-                                exercicio.original.numSeries,
-                                exercicio.original.minRepeticoes,
-                                exercicio.original.maxRepeticoes
-                            )
-                        }
+                val text = if (exercicio.original.minRepeticoes == exercicio.original.maxRepeticoes) {
+                    stringResource(
+                        id = R.string.exercicio_reps,
+                        exercicio.original.numSeries,
+                        exercicio.original.minRepeticoes
+                    )
+                } else {
+                    stringResource(
+                        id = R.string.exercicio_reps_min_max,
+                        exercicio.original.numSeries,
+                        exercicio.original.minRepeticoes,
+                        exercicio.original.maxRepeticoes
+                    )
+                }
 
-                        Text(modifier = Modifier.fillMaxWidth(), text = text)
-                    }
+                Text(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    text = text
                 )
                 RoundedButton(
                     modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
@@ -491,43 +490,30 @@ class MainActivity : ComponentActivity() {
                         top = dimensionResource(id = R.dimen.padding_p)
                     ), verticalAlignment = Alignment.CenterVertically
             ) {
-                val initial = mutableListOf<Boolean>()
-
-                for (i in 0 until exercicio.original.numSeries) {
-                    initial.add(false)
-                }
-
-                var concluido by remember { mutableStateOf(initial.toList()) }
-
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     text = stringResource(id = R.string.exercicio_series_concluidas)
                 )
-                concluido.forEachIndexed { index, checked ->
+                viewModel.seriesConcluidas[exercicio.original.id]?.forEachIndexed { index, checked ->
                     MyGymPalCheckbox(
                         modifier = Modifier.padding(
                             start = if (index == 0) 0.dp else dimensionResource(id = R.dimen.padding_p)
                         ), checked = checked,
                         onCheckedChange = {
-                            val list = mutableListOf<Boolean>()
+                            viewModel.concluiSerie(
+                                idExercicio = exercicio.original.id,
+                                index = index,
+                                concluido = it
+                            )
 
-                            concluido.forEachIndexed { innerIndex, _ ->
-                                list.add(
-                                    if (index == innerIndex) it else concluido[innerIndex]
-                                )
-                            }
-
-                            concluido = list.toList()
-
-                            if (concluido.all { it }) {
+                            if (viewModel.seriesConcluidas[exercicio.original.id]?.all { it } == true) {
                                 viewModel.concluiExercicio(exercicio = exercicio)
-                                podeConcluir = false
                                 aoConcluir(exercicio.original.id)
                                 Toast.makeText(context, msgSucessoConcluir, Toast.LENGTH_LONG).show()
                             }
-                        }, enabled = podeConcluir
+                        }, enabled = viewModel.podeConcluir[exercicio.original.id] ?: true
                     )
                 }
             }

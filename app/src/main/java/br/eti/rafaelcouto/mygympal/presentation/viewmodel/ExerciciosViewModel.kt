@@ -19,9 +19,43 @@ class ExerciciosViewModel @Inject constructor(
 ) : ViewModel() {
 
     var idGrupo by mutableStateOf(0L)
+    var seriesConcluidas: Map<Long, List<Boolean>> by mutableStateOf(hashMapOf())
+    var podeConcluir: Map<Long, Boolean> by mutableStateOf(hashMapOf())
 
     fun carregaGrupo(): Flow<Grupo> = flow {
         if (idGrupo != 0L) emit(grupoUseCase.localizaGrupo(idGrupo))
+    }
+
+    fun resetaSeries() {
+        seriesConcluidas = hashMapOf()
+        podeConcluir = hashMapOf()
+    }
+
+    fun iniciaSeriesConcluidas(exercicio: Exercicio.UI) {
+        if (seriesConcluidas[exercicio.original.id] != null) return
+
+        val initial = List(exercicio.original.numSeries.toInt()) { false }
+
+        val novo = HashMap(seriesConcluidas)
+        novo[exercicio.original.id] = initial
+        seriesConcluidas = novo
+    }
+
+    fun concluiSerie(idExercicio: Long, index: Int, concluido: Boolean) {
+        val list = mutableListOf<Boolean>()
+
+        seriesConcluidas[idExercicio]?.forEachIndexed { mIndex, _ ->
+            list.add(
+                if (index == mIndex)
+                    concluido
+                else
+                    seriesConcluidas[idExercicio]?.get(mIndex) ?: false
+            )
+        }
+
+        val novo = HashMap(seriesConcluidas)
+        novo[idExercicio] = list.toList()
+        seriesConcluidas = novo
     }
 
     suspend fun excluiGrupo() {
@@ -51,7 +85,14 @@ class ExerciciosViewModel @Inject constructor(
     }
 
     fun reduzCarga(exercicio: Exercicio) = exercicioUseCase.reduzCarga(exercicio)
-    fun concluiExercicio(exercicio: Exercicio.UI) = exercicioUseCase.concluiExercicio(exercicio)
+
+    fun concluiExercicio(exercicio: Exercicio.UI) {
+        val novo = HashMap(podeConcluir)
+        novo[exercicio.original.id] = false
+        podeConcluir = novo
+
+        exercicioUseCase.concluiExercicio(exercicio)
+    }
 
     suspend fun concluiGrupo(exercicios: List<Exercicio.UI>) {
         val id = exercicios.firstOrNull()?.original?.idGrupo ?: return
@@ -76,5 +117,18 @@ class ExerciciosViewModel @Inject constructor(
 
             exercicioUseCase.concluiGrupo(exercicios)
         }
+    }
+
+    fun concluiSeries(exericicos: List<Exercicio.UI>) {
+        val novoSeries = HashMap(seriesConcluidas)
+        val novoChecks = HashMap(podeConcluir)
+
+        exericicos.forEach {
+            novoSeries[it.original.id] = List(it.original.numSeries.toInt()) { true }
+            novoChecks[it.original.id] = false
+        }
+
+        seriesConcluidas = novoSeries
+        podeConcluir = novoChecks
     }
 }
