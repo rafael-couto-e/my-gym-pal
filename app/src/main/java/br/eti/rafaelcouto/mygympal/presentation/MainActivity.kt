@@ -7,15 +7,56 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,11 +98,11 @@ class MainActivity : ComponentActivity() {
         object Rotas {
             const val LISTA_GRUPOS = "grupos"
             const val CAD_GRUPO = "grupo"
-            val EDIT_GRUPO = "grupo/{${Args.ID_GRUPO}}"
+            const val EDIT_GRUPO = "grupo/{${Args.ID_GRUPO}}"
 
-            val LISTA_EXERCICIOS = "{${Args.ID_GRUPO}}/exercicios"
-            val CAD_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio"
-            val EDIT_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio/{${Args.ID_EXERCICIO}}"
+            const val LISTA_EXERCICIOS = "{${Args.ID_GRUPO}}/exercicios"
+            const val CAD_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio"
+            const val EDIT_EXERCICIO = "{${Args.ID_GRUPO}}/exercicio/{${Args.ID_EXERCICIO}}"
 
             fun listaExercicios(idGrupo: Long) = "$idGrupo/exercicios"
             fun editGrupo(idGrupo: Long) = "grupo/$idGrupo"
@@ -187,7 +228,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(route = Rotas.listaExercicios(idGrupo = grupo.id))
                             }, grupo = grupo
                         )
-                        Divider(color = colorResource(id = R.color.colorPrimaryAlpha))
+                        HorizontalDivider(color = colorResource(id = R.color.colorPrimaryAlpha))
                     }
                 }
             )
@@ -386,7 +427,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             }, navController = navController
                         )
-                        Divider(color = colorResource(id = R.color.colorPrimaryAlpha))
+                        HorizontalDivider(color = colorResource(id = R.color.colorPrimaryAlpha))
                     }
                 }
             )
@@ -458,7 +499,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Text(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     text = text
                 )
                 RoundedButton(
@@ -508,7 +551,7 @@ class MainActivity : ComponentActivity() {
                                 concluido = it
                             )
 
-                            if (viewModel.seriesConcluidas[exercicio.original.id]?.all { it } == true) {
+                            if (viewModel.seriesConcluidas[exercicio.original.id]?.all { finished -> finished } == true) {
                                 viewModel.concluiExercicio(exercicio = exercicio)
                                 aoConcluir(exercicio.original.id)
                                 Toast.makeText(context, msgSucessoConcluir, Toast.LENGTH_LONG).show()
@@ -632,12 +675,12 @@ class MainActivity : ComponentActivity() {
                         if (withBackButton)
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(id = R.string.voltar_content_description)
                                 )
                             }
                     }, actions = actions,
-                    colors = TopAppBarDefaults.smallTopAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = colorResource(id = R.color.colorSecondary),
                         titleContentColor = colorResource(id = R.color.white),
                         navigationIconContentColor = colorResource(id = R.color.white),
@@ -705,16 +748,18 @@ class MainActivity : ComponentActivity() {
                     vertical = dimensionResource(id = R.dimen.padding_p)
                 ), label = { Text(text = label) },
             keyboardOptions = keyboardOptions,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = colorResource(id = R.color.black),
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = colorResource(id = R.color.colorSecondary),
                 selectionColors = TextSelectionColors(
                     handleColor = colorResource(id = R.color.darkGrey),
                     backgroundColor = colorResource(id = R.color.mediumGrey)
-                ), unfocusedLabelColor = colorResource(id = R.color.black),
+                ),
+                focusedTextColor = colorResource(id = R.color.black),
+                unfocusedTextColor = colorResource(id = R.color.black),
                 focusedLabelColor = colorResource(id = R.color.colorPrimary),
-                unfocusedBorderColor = colorResource(id = R.color.black),
-                focusedBorderColor = colorResource(id = R.color.colorPrimary)
+                unfocusedLabelColor = colorResource(id = R.color.black),
+                focusedBorderColor = colorResource(id = R.color.colorPrimary),
+                unfocusedBorderColor = colorResource(id = R.color.black)
             )
         )
     }
@@ -789,7 +834,7 @@ class MainActivity : ComponentActivity() {
         onCheckedChange: (Boolean) -> Unit,
         enabled: Boolean
     ) {
-        CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
             Checkbox(
                 modifier = modifier.padding(
                     vertical = dimensionResource(id = R.dimen.padding_p)
