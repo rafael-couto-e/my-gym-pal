@@ -191,20 +191,20 @@ class MainActivity : ComponentActivity() {
 
         MyGymPalScreen(
             navController = navController,
-            title = stringResource(id = R.string.home_titulo),
+            title = stringResource(id = R.string.my_workouts),
             withBackButton = false,
             fab = {
                 Fab(onClick = { navController.navigate(Rotas.CAD_GRUPO) }) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.cad_grupo_content_description)
+                        contentDescription = stringResource(id = R.string.create_workout)
                     )
                 }
             }, content = { paddingValues ->
                 EmptyMessage(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
                     visible = grupos.isEmpty(),
-                    text = stringResource(id = R.string.home_vazio_msg)
+                    text = stringResource(id = R.string.no_workouts_found)
                 )
                 ListGrupos(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
@@ -264,14 +264,14 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
         val msgSucesso = stringResource(
-            id = if (idGrupo == null) R.string.cad_grupo_sucesso else R.string.edit_grupo_sucesso
+            id = if (idGrupo == null) R.string.workout_created else R.string.workout_updated
         )
 
         idGrupo?.let { viewModel.carregaGrupo(it) }
 
         MyGymPalScreen(
             navController = navController,
-            title = stringResource(id = if (idGrupo == null) R.string.cad_grupo_titulo else R.string.edit_grupo_titulo),
+            title = stringResource(id = if (idGrupo == null) R.string.create_workout else R.string.edit_workout),
             withBackButton = true,
             content = { paddingValues ->
                 BottomButtonColumn(
@@ -279,7 +279,7 @@ class MainActivity : ComponentActivity() {
                     content = {
                         TextField(
                             value = viewModel.nomeGrupo,
-                            label = stringResource(id = R.string.cad_grupo_campo_nome),
+                            label = stringResource(id = R.string.workout_name),
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Words,
                                 imeAction = ImeAction.Done
@@ -289,7 +289,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     },
-                    buttonTitle = stringResource(id = R.string.cad_grupo_salvar),
+                    buttonTitle = stringResource(id = R.string.save_workout),
                     buttonEnabled = viewModel.habilitaBotao,
                     buttonClick = {
                         coroutineScope.launch {
@@ -319,12 +319,12 @@ class MainActivity : ComponentActivity() {
         )
         val grupo = viewModel.carregaGrupo().collectAsStateWithLifecycle(
             owner = owner,
-            initial = Grupo(0, stringResource(id = R.string.lista_exercicios_titulo_padrao))
+            initial = Grupo(0, stringResource(id = R.string.exercises))
         )
 
         var podeConcluir by remember { mutableStateOf(true) }
-        val msgSucessoConcluir = stringResource(id = R.string.concluir_grupo_sucesso)
-        val msgSucessoExcluir = stringResource(id = R.string.grupo_delete_sucesso)
+        val msgSucessoConcluir = stringResource(id = R.string.workout_finished)
+        val msgSucessoExcluir = stringResource(id = R.string.workout_deleted)
 
         MyGymPalScreen(
             navController = navController,
@@ -345,7 +345,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Done,
-                            contentDescription = stringResource(id = R.string.concluir_grupo_content_description)
+                            contentDescription = stringResource(id = R.string.finish_workout)
                         )
                     }
                 }
@@ -353,11 +353,11 @@ class MainActivity : ComponentActivity() {
                 MyGymPalDropdownMenu(
                     items = {
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.grupo_menu_edit)) },
+                            text = { Text(text = stringResource(id = R.string.edit)) },
                             onClick = { navController.navigate(route = Rotas.editGrupo(idGrupo)) }
                         )
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.grupo_menu_delete)) },
+                            text = { Text(text = stringResource(id = R.string.delete)) },
                             onClick = {
                                 coroutineScope.launch {
                                     viewModel.excluiGrupo()
@@ -373,7 +373,7 @@ class MainActivity : ComponentActivity() {
                 Fab(onClick = { navController.navigate(route = Rotas.cadExercicio(idGrupo)) }) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.cad_exercicio_content_description)
+                        contentDescription = stringResource(id = R.string.add_exercise)
                     )
                 }
             },
@@ -381,7 +381,7 @@ class MainActivity : ComponentActivity() {
                 EmptyMessage(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
                     visible = exercicios.isEmpty(),
-                    text = stringResource(id = R.string.exercicios_vazio_msg)
+                    text = stringResource(id = R.string.no_exercises_found)
                 )
                 ListaExercicios(
                     modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
@@ -403,7 +403,7 @@ class MainActivity : ComponentActivity() {
         if (exercicios.isNotEmpty()) {
             val mExercicios by remember { mutableStateOf(exercicios) }
             var concluidos by remember { mutableStateOf(mExercicios.map { false }) }
-            val msgSucesso = stringResource(id = R.string.concluir_grupo_sucesso)
+            val msgSucesso = stringResource(id = R.string.workout_finished)
 
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
@@ -441,9 +441,9 @@ class MainActivity : ComponentActivity() {
 
         viewModel.iniciaSeriesConcluidas(exercicio = exercicio)
 
-        val msgSucessoDec = stringResource(id = R.string.carga_reduzida_sucesso)
-        val msgSucessoInc = stringResource(id = R.string.carga_aumentada_sucesso)
-        val msgSucessoConcluir = stringResource(id = R.string.concluir_exercicio_sucesso)
+        val msgSucessoDec = stringResource(id = R.string.load_decreased)
+        val msgSucessoInc = stringResource(id = R.string.load_increased)
+        val msgSucessoConcluir = stringResource(id = R.string.exercise_done)
 
         Column(
             modifier = Modifier
@@ -456,7 +456,7 @@ class MainActivity : ComponentActivity() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = dimensionResource(id = R.dimen.padding_pp)),
+                    .padding(top = dimensionResource(id = R.dimen.padding_xp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -474,7 +474,7 @@ class MainActivity : ComponentActivity() {
                             )
                         )
                     }, imageVector = Icons.Filled.Edit,
-                    contentDescription = stringResource(id = R.string.edit_exercicio_content_description)
+                    contentDescription = stringResource(id = R.string.edit_exercise)
                 )
             }
             Row(
@@ -485,13 +485,13 @@ class MainActivity : ComponentActivity() {
             ) {
                 val text = if (exercicio.original.minRepeticoes == exercicio.original.maxRepeticoes) {
                     stringResource(
-                        id = R.string.exercicio_reps,
+                        id = R.string.sets_and_reps,
                         exercicio.original.numSeries,
                         exercicio.original.minRepeticoes
                     )
                 } else {
                     stringResource(
-                        id = R.string.exercicio_reps_min_max,
+                        id = R.string.sets_min_max_reps,
                         exercicio.original.numSeries,
                         exercicio.original.minRepeticoes,
                         exercicio.original.maxRepeticoes
@@ -511,11 +511,11 @@ class MainActivity : ComponentActivity() {
                         carga--
                         Toast.makeText(context, msgSucessoDec, Toast.LENGTH_SHORT).show()
                     }, imageVector = Icons.Filled.KeyboardArrowDown,
-                    contentDescription = stringResource(id = R.string.reduzir_carga_content_description)
+                    contentDescription = stringResource(id = R.string.decrease_load)
                 )
                 Text(
                     modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
-                    text = stringResource(id = R.string.carga_kg, carga)
+                    text = stringResource(id = R.string.load_kg, carga)
                 )
                 RoundedButton(
                     onClick = {
@@ -523,7 +523,7 @@ class MainActivity : ComponentActivity() {
                         carga++
                         Toast.makeText(context, msgSucessoInc, Toast.LENGTH_SHORT).show()
                     }, imageVector = Icons.Filled.KeyboardArrowUp,
-                    contentDescription = stringResource(id = R.string.aumentar_carga_content_description)
+                    contentDescription = stringResource(id = R.string.increase_weight)
                 )
             }
             Row(
@@ -537,7 +537,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    text = stringResource(id = R.string.exercicio_series_concluidas)
+                    text = stringResource(id = R.string.sets_done)
                 )
                 viewModel.seriesConcluidas[exercicio.original.id]?.forEachIndexed { index, checked ->
                     MyGymPalCheckbox(
@@ -573,15 +573,15 @@ class MainActivity : ComponentActivity() {
 
         mIdExercicio?.let { viewModel.carregaExercicio(it) }
 
-        val msgExcluiExercicio = stringResource(id = R.string.exclui_exercicio_sucesso)
+        val msgExcluiExercicio = stringResource(id = R.string.exercise_deleted)
         val msgCadExercicio = stringResource(
-            id = if (idExercicio == null) R.string.cad_exercicio_sucesso else R.string.edit_exercicio_sucesso
+            id = if (idExercicio == null) R.string.exercise_created else R.string.exercise_updated
         )
 
         MyGymPalScreen(
             navController = navController,
             title = stringResource(
-                id = if (mIdExercicio == null) R.string.cad_exercicio_titulo else R.string.edit_exercicio_titulo
+                id = if (mIdExercicio == null) R.string.add_exercise else R.string.edit_exercise
             ), withBackButton = true,
             actions = {
                 mIdExercicio?.let {
@@ -593,7 +593,7 @@ class MainActivity : ComponentActivity() {
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(id = R.string.exclui_exercicio_content_description)
+                            contentDescription = stringResource(id = R.string.delete_exercise)
                         )
                     }
                 }
@@ -604,7 +604,7 @@ class MainActivity : ComponentActivity() {
                 content = {
                     TextField(
                         value = viewModel.nomeExercicio,
-                        label = stringResource(id = R.string.cad_exercicio_campo_nome),
+                        label = stringResource(id = R.string.exercise_name),
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.nomeExercicio = it
@@ -613,7 +613,7 @@ class MainActivity : ComponentActivity() {
                     )
                     TextField(
                         value = viewModel.numSeries,
-                        label = stringResource(id = R.string.cad_exercicio_campo_series),
+                        label = stringResource(id = R.string.number_of_sets),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.numSeries = it
@@ -622,7 +622,7 @@ class MainActivity : ComponentActivity() {
                     )
                     TextField(
                         value = viewModel.minRepeticoes,
-                        label = stringResource(id = R.string.cad_exercicio_campo_min_rep),
+                        label = stringResource(id = R.string.min_reps),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.minRepeticoes = it
@@ -631,7 +631,7 @@ class MainActivity : ComponentActivity() {
                     )
                     TextField(
                         value = viewModel.maxRepeticoes,
-                        label = stringResource(id = R.string.cad_exercicio_campo_max_rep),
+                        label = stringResource(id = R.string.max_reps),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         onValueChange = {
                             viewModel.maxRepeticoes = it
@@ -640,14 +640,14 @@ class MainActivity : ComponentActivity() {
                     )
                     TextField(
                         value = viewModel.carga,
-                        label = stringResource(id = R.string.cad_exercicio_campo_carga),
+                        label = stringResource(id = R.string.load),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                         onValueChange = {
                             viewModel.carga = it
                             viewModel.validaBotao()
                         }
                     )
-                }, buttonTitle = stringResource(id = R.string.cad_exercicio_salvar),
+                }, buttonTitle = stringResource(id = R.string.save_exercise),
                 buttonEnabled = viewModel.podeContinuar,
                 buttonClick =  {
                     viewModel.salvaExercicio(idGrupo = idGrupo)
@@ -676,7 +676,7 @@ class MainActivity : ComponentActivity() {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(id = R.string.voltar_content_description)
+                                    contentDescription = stringResource(id = R.string.go_back)
                                 )
                             }
                     }, actions = actions,
@@ -700,7 +700,7 @@ class MainActivity : ComponentActivity() {
         IconButton(onClick = { exibeMenu = !exibeMenu }) {
             Icon(
                 imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(id = R.string.menu_opcoes)
+                contentDescription = stringResource(id = R.string.options)
             )
         }
 
