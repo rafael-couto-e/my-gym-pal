@@ -88,7 +88,6 @@ class ExerciseListViewModel @Inject constructor(
         viewModelScope.launch {
             exerciseUseCase.getAllExercises(workoutId).collect { exercises ->
                 _uiState.update { state ->
-                    // TODO keep finished state based on state.exercises finished value
                     state.copy(
                         exercises = exercises
                     )
