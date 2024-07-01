@@ -1,0 +1,177 @@
+package br.eti.rafaelcouto.mygympal.presentation.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import br.eti.rafaelcouto.mygympal.R
+import br.eti.rafaelcouto.mygympal.data.structure.CircularLinkedList
+import br.eti.rafaelcouto.mygympal.domain.model.Workout
+import br.eti.rafaelcouto.mygympal.extensions.items
+import br.eti.rafaelcouto.mygympal.presentation.components.EmptyMessage
+import br.eti.rafaelcouto.mygympal.presentation.components.FloatingActionButton
+import br.eti.rafaelcouto.mygympal.presentation.uistate.MainActivityUiState
+import br.eti.rafaelcouto.mygympal.presentation.uistate.WorkoutListScrenUiState
+
+@Composable
+fun WorkoutListScreen(
+    onWorkoutSelected: (Workout) -> Unit = {},
+    onFabClicked: () -> Unit = {},
+    setMainActivityState: (MainActivityUiState) -> Unit = {},
+    state: WorkoutListScrenUiState = WorkoutListScrenUiState()
+) {
+    if (state.shouldDisplayEmptyMessage)
+        EmptyMessage(
+            text = stringResource(id = R.string.no_workouts_found)
+        )
+
+    WorkoutList(
+        onItemClick = onWorkoutSelected,
+        workouts = state.workouts
+    )
+
+    LaunchedEffect(Unit) {
+        val mainState = MainActivityUiState(
+            titleRes = R.string.my_workouts,
+            floatingActionButton = {
+                FloatingActionButton(
+                    icon = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.create_workout),
+                    onClick = onFabClicked
+                )
+            }
+        )
+        setMainActivityState(mainState)
+    }
+}
+
+@Composable
+fun WorkoutList(
+    onItemClick: (Workout) -> Unit = {},
+    workouts: CircularLinkedList<Workout>
+) {
+    LazyColumn(
+        content = {
+            items(collection = workouts) { workout ->
+                WorkoutItem(
+                    workout = workout,
+                    onItemClick = onItemClick
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun WorkoutItem(
+    workout: Workout,
+    onItemClick: (Workout) -> Unit = {}
+) {
+    val itemBackgroundColor = if (workout.isLast)
+        colorResource(id = R.color.mediumGrey)
+    else
+        Color.Transparent
+
+    val itemFontWeight = if (workout.isLast)
+        FontWeight.Bold
+    else
+        FontWeight.Normal
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = itemBackgroundColor)
+            .clickable { onItemClick(workout) },
+        content = {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = dimensionResource(id = R.dimen.padding_m),
+                        vertical = dimensionResource(id = R.dimen.padding_p)
+                    ),
+                text = workout.name,
+                fontWeight = itemFontWeight
+            )
+        }
+    )
+    HorizontalDivider(color = colorResource(id = R.color.colorPrimaryAlpha))
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun WorkoutListScreenEmptyPreview() {
+    WorkoutListScreen()
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun WorkoutListScreenNotEmptyPreview() {
+    WorkoutListScreen(
+        state = WorkoutListScrenUiState(
+            workouts = CircularLinkedList<Workout>().apply {
+                add(
+                    Workout(
+                        name = "Workout 1",
+                        isLast = true
+                    )
+                )
+                add(Workout(name = "Workout 2"))
+                add(Workout(name = "Workout 3"))
+            }
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkoutListPreview() {
+    WorkoutList(
+        workouts = CircularLinkedList<Workout>().apply {
+            add(
+                Workout(
+                    name = "Workout 1",
+                    isLast = true
+                )
+            )
+            add(Workout(name = "Workout 2"))
+            add(Workout(name = "Workout 3"))
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkoutItemNotLastPreview() {
+    WorkoutItem(
+        workout = Workout(
+            name = "Workout"
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun WorkoutItemLastPreview() {
+    WorkoutItem(
+        workout = Workout(
+            name = "Workout",
+            isLast = true
+        )
+    )
+}

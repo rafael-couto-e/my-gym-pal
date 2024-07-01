@@ -71,7 +71,9 @@ class CircularLinkedList<T> {
     }
 
     fun clear() = content.clear()
+    fun first(predicate: (Node<T>) -> Boolean) = content.first { predicate(it) }
     fun firstOrNull() = content.firstOrNull()
+    fun firstOrNull(predicate: (Node<T>) -> Boolean) = content.firstOrNull { predicate(it) }
     fun lastOrNull() = content.lastOrNull()
     fun filter(predicate: (Node<T>) -> Boolean) = content.filter(predicate)
     fun isEmpty() = content.isEmpty()

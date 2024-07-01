@@ -1,9 +1,9 @@
 package br.eti.rafaelcouto.mygympal.di
 
-import br.eti.rafaelcouto.mygympal.domain.mapper.ExercicioMapper
-import br.eti.rafaelcouto.mygympal.domain.mapper.ExercicioMapperAbs
-import br.eti.rafaelcouto.mygympal.domain.mapper.GrupoMapper
-import br.eti.rafaelcouto.mygympal.domain.mapper.GrupoMapperAbs
+import br.eti.rafaelcouto.mygympal.domain.mapper.ExerciseMapper
+import br.eti.rafaelcouto.mygympal.domain.mapper.ExerciseMapperAbs
+import br.eti.rafaelcouto.mygympal.domain.mapper.WorkoutMapper
+import br.eti.rafaelcouto.mygympal.domain.mapper.WorkoutMapperAbs
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,6 +13,6 @@ import dagger.hilt.android.components.ViewModelComponent
 @InstallIn(ViewModelComponent::class)
 abstract class MapperModule {
 
-    @Binds abstract fun bindGrupoMapper(implementation: GrupoMapper): GrupoMapperAbs
-    @Binds abstract fun bindExercicioMapper(implementation: ExercicioMapper): ExercicioMapperAbs
+    @Binds abstract fun bindWorkoutMapper(implementation: WorkoutMapper): WorkoutMapperAbs
+    @Binds abstract fun bindExerciseMapper(implementation: ExerciseMapper): ExerciseMapperAbs
 }

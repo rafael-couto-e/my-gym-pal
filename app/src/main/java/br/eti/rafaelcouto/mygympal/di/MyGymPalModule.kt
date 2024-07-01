@@ -2,7 +2,7 @@ package br.eti.rafaelcouto.mygympal.di
 
 import android.content.Context
 import androidx.room.Room
-import br.eti.rafaelcouto.mygympal.data.MyGymPalDatabase
+import br.eti.rafaelcouto.mygympal.data.db.MyGymPalDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,13 +18,13 @@ object MyGymPalModule {
     @Provides
     fun provideMyGymPalDatabase(
         @ApplicationContext context: Context
-    ) = Room.databaseBuilder(context, MyGymPalDatabase::class.java, "my_gym_pal").allowMainThreadQueries().build()
+    ) = Room.databaseBuilder(context, MyGymPalDatabase::class.java, "my_gym_pal").build()
 
     @Singleton
     @Provides
-    fun provideGrupoDao(database: MyGymPalDatabase) = database.grupoDao()
+    fun provideWorkoutDao(database: MyGymPalDatabase) = database.workoutDao()
 
     @Singleton
     @Provides
-    fun provideExercicioDao(database: MyGymPalDatabase) = database.exercicioDao()
+    fun provideExerciseDao(database: MyGymPalDatabase) = database.exerciseDao()
 }

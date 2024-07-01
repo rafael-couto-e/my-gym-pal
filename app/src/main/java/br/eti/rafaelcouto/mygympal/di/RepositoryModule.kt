@@ -1,9 +1,9 @@
 package br.eti.rafaelcouto.mygympal.di
 
-import br.eti.rafaelcouto.mygympal.data.repository.ExercicioRepository
-import br.eti.rafaelcouto.mygympal.data.repository.ExercicioRepositoryAbs
-import br.eti.rafaelcouto.mygympal.data.repository.GrupoRepository
-import br.eti.rafaelcouto.mygympal.data.repository.GrupoRepositoryAbs
+import br.eti.rafaelcouto.mygympal.data.repository.ExerciseRepository
+import br.eti.rafaelcouto.mygympal.data.repository.ExerciseRepositoryAbs
+import br.eti.rafaelcouto.mygympal.data.repository.WorkoutRepository
+import br.eti.rafaelcouto.mygympal.data.repository.WorkoutRepositoryAbs
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,6 +13,6 @@ import dagger.hilt.android.components.ViewModelComponent
 @InstallIn(ViewModelComponent::class)
 abstract class RepositoryModule {
 
-    @Binds abstract fun bindGrupoRepository(implementation: GrupoRepository): GrupoRepositoryAbs
-    @Binds abstract fun bindExercicioRepository(implementation: ExercicioRepository): ExercicioRepositoryAbs
+    @Binds abstract fun bindWorkoutRepository(implementation: WorkoutRepository): WorkoutRepositoryAbs
+    @Binds abstract fun bindExerciseRepository(implementation: ExerciseRepository): ExerciseRepositoryAbs
 }

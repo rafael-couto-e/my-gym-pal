@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.room.ktx)
 
     implementation(libs.hilt.android)
+    implementation(libs.hilt.compose)
 
     ksp(libs.room.compiler)
     kapt(libs.hilt.compiler)
