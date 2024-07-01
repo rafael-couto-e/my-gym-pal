@@ -85,55 +85,61 @@ fun ExerciseListScreen(
         canFinishWorkout = state.canFinishWorkout
     )
 
-    LaunchedEffect(state.workout, state.canFinishWorkout, state.isMenuExpanded) {
-        val mainState = MainActivityUiState(
-            title = state.workout.name,
-            showsBackButton = true,
-            floatingActionButton = {
-                FloatingActionButton(
-                    icon = Icons.Filled.Add,
-                    contentDescription = stringResource(id = R.string.add_exercise),
-                    onClick = {
-                        onAddExercise(state.workout.id)
+    LaunchedEffect(
+        state.workout,
+        state.canFinishWorkout,
+        state.isMenuExpanded,
+        state.shouldDisplayEmptyMessage,
+        block = {
+            val mainState = MainActivityUiState(
+                title = state.workout.name,
+                showsBackButton = true,
+                floatingActionButton = {
+                    FloatingActionButton(
+                        icon = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.add_exercise),
+                        onClick = {
+                            onAddExercise(state.workout.id)
+                        }
+                    )
+                },
+                topAppBarActions = {
+                    if (!state.shouldDisplayEmptyMessage) {
+                        IconButton(
+                            enabled = state.canFinishWorkout,
+                            onClick = onFinishWorkout,
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = stringResource(id = R.string.finish_workout)
+                                )
+                            }
+                        )
                     }
-                )
-            },
-            topAppBarActions = {
-                if (!state.shouldDisplayEmptyMessage) {
-                    IconButton(
-                        enabled = state.canFinishWorkout,
-                        onClick = onFinishWorkout,
-                        content = {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = stringResource(id = R.string.finish_workout)
-                            )
-                        }
-                    )
-                }
 
-                DropDownMenu(
-                    expanded = state.isMenuExpanded,
-                    onToggle = onMenuToggle
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.edit)) },
-                        onClick = {
-                            onEditWorkoutClick(state.workout.id)
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.delete)) },
-                        onClick = {
-                            onDeleteWorkoutClicked()
-                            showMessage(workoutDeletedSuccessMessage)
-                        }
-                    )
+                    DropDownMenu(
+                        expanded = state.isMenuExpanded,
+                        onToggle = onMenuToggle
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.edit)) },
+                            onClick = {
+                                onEditWorkoutClick(state.workout.id)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.delete)) },
+                            onClick = {
+                                onDeleteWorkoutClicked()
+                                showMessage(workoutDeletedSuccessMessage)
+                            }
+                        )
+                    }
                 }
-            }
-        )
-        setMainActivityState(mainState)
-    }
+            )
+            setMainActivityState(mainState)
+        }
+    )
 }
 
 @Composable

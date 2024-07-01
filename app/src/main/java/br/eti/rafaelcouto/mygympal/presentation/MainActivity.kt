@@ -59,7 +59,9 @@ class MainActivity : ComponentActivity() {
 fun MyGymPalApp(
     navController: NavHostController = rememberNavController()
 ) {
-    var mainState by remember { mutableStateOf(MainActivityUiState("")) }
+    var mainState by remember {
+        mutableStateOf(MainActivityUiState(titleRes = R.string.app_name))
+    }
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
 
