@@ -18,7 +18,8 @@ private const val exerciseFormFullRoute = "$workoutFormRoute/{$workoutIdArg}/$ex
 
 fun NavGraphBuilder.exerciseFormScreen(
     navController: NavController,
-    setMainActivityState: (MainActivityUiState) -> Unit = {}
+    setMainActivityState: (MainActivityUiState) -> Unit = {},
+    showMessage: (String) -> Unit = {}
 ) {
     composable(
         route = exerciseFormFullRoute,
@@ -45,6 +46,7 @@ fun NavGraphBuilder.exerciseFormScreen(
                 viewModel.deleteExercise()
                 navController.popBackStack()
             },
+            showMessage = showMessage,
             setMainActivityState = setMainActivityState,
             state = state
         )

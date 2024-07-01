@@ -1,13 +1,11 @@
 package br.eti.rafaelcouto.mygympal.presentation.screens
 
-import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -23,10 +21,11 @@ import br.eti.rafaelcouto.mygympal.presentation.uistate.MainActivityUiState
 fun ExerciseFormScreen(
     onSaveExercise: () -> Unit = {},
     onDeleteExerciseClicked: () -> Unit = {},
+    showMessage: (String) -> Unit = {},
     setMainActivityState: (MainActivityUiState) -> Unit = {},
     state: ExerciseFormUiState = ExerciseFormUiState()
 ) {
-    val context = LocalContext.current
+
     val deleteExerciseMessage = stringResource(id = R.string.exercise_deleted)
     val saveExerciseMessage = stringResource(state.successMessage)
 
@@ -35,8 +34,7 @@ fun ExerciseFormScreen(
         isButtonEnabled = state.isButtonEnabled,
         onButtonClick = {
             onSaveExercise()
-            Toast.makeText(context, saveExerciseMessage, Toast.LENGTH_LONG).show()
-            // TODO replace toast with snackbar
+            showMessage(saveExerciseMessage)
         },
         content = {
             TextField(
@@ -77,7 +75,7 @@ fun ExerciseFormScreen(
         }
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(state.exerciseId) {
         val titleRes = if (state.exerciseId == 0L)
             R.string.add_exercise
         else
@@ -91,8 +89,7 @@ fun ExerciseFormScreen(
                     IconButton(
                         onClick = {
                             onDeleteExerciseClicked()
-                            Toast.makeText(context, deleteExerciseMessage, Toast.LENGTH_LONG).show()
-                            // TODO replace toast with snackbar
+                            showMessage(deleteExerciseMessage)
                         },
                         content = {
                             Icon(

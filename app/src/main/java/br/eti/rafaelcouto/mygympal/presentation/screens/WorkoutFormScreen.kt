@@ -1,9 +1,7 @@
 package br.eti.rafaelcouto.mygympal.presentation.screens
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -18,9 +16,9 @@ import br.eti.rafaelcouto.mygympal.presentation.uistate.WorkoutFormScreenUiState
 fun WorkoutFormScreen(
     onSaveWorkout: () -> Unit = {},
     setMainActivityState: (MainActivityUiState) -> Unit = {},
+    showMessage: (String) -> Unit = {},
     state: WorkoutFormScreenUiState = WorkoutFormScreenUiState()
 ) {
-    val context = LocalContext.current
     val successMessage = stringResource(id = state.successMessage)
 
     BottomButtonColumn(
@@ -28,8 +26,7 @@ fun WorkoutFormScreen(
         isButtonEnabled = state.isButtonEnabled,
         onButtonClick = {
             onSaveWorkout()
-            Toast.makeText(context, successMessage, Toast.LENGTH_LONG).show()
-            // TODO replace toast with snackbar
+            showMessage(successMessage)
         },
         content = {
             TextField(
@@ -44,7 +41,7 @@ fun WorkoutFormScreen(
         }
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(state.workoutId) {
         val titleRes = if (state.workoutId == 0L)
             R.string.create_workout
         else

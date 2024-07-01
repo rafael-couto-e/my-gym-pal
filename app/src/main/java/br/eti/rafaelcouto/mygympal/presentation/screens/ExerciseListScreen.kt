@@ -1,6 +1,5 @@
 package br.eti.rafaelcouto.mygympal.presentation.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -50,11 +48,14 @@ fun ExerciseListScreen(
     onMenuToggle: (Boolean) -> Unit = {},
     onEditWorkoutClick: (Long) -> Unit = {},
     onDeleteWorkoutClicked: () -> Unit = {},
+    showMessage: (String) -> Unit = {},
     setMainActivityState: (MainActivityUiState) -> Unit = {},
     state: ExerciseListUiState = ExerciseListUiState()
 ) {
 
-    val context = LocalContext.current
+    val exerciseFinishedSuccessMessage = stringResource(id = R.string.exercise_done)
+    val decreaseLoadSuccessMessage = stringResource(id = R.string.load_decreased)
+    val increaseLoadSuccessMessage = stringResource(id = R.string.load_increased)
     val workoutDeletedSuccessMessage = stringResource(id = R.string.workout_deleted)
     val workoutFinishedSuccessMessage = stringResource(id = R.string.workout_finished)
 
@@ -65,65 +66,74 @@ fun ExerciseListScreen(
 
     ExerciseList(
         exercises = state.exercises,
-        onIncreaseLoad = onIncreaseLoad,
-        onDecreaseLoad = onDecreaseLoad,
+        onIncreaseLoad = {
+            onIncreaseLoad(it)
+            showMessage(increaseLoadSuccessMessage)
+        },
+        onDecreaseLoad = {
+            onDecreaseLoad(it)
+            showMessage(decreaseLoadSuccessMessage)
+        },
         onEditExerciseClick = onEditExerciseClick,
+        onExerciseFinished = {
+            showMessage(exerciseFinishedSuccessMessage)
+        },
         onSetFinished = onSetFinshed,
+        onWorkoutFinished = {
+            showMessage(workoutFinishedSuccessMessage)
+        },
         canFinishWorkout = state.canFinishWorkout
     )
 
-    val mainState = MainActivityUiState(
-        title = state.workout.name,
-        showsBackButton = true,
-        floatingActionButton = {
-            FloatingActionButton(
-                icon = Icons.Filled.Add,
-                contentDescription = stringResource(id = R.string.add_exercise),
-                onClick = {
-                    onAddExercise(state.workout.id)
+    LaunchedEffect(state.workout, state.canFinishWorkout, state.isMenuExpanded) {
+        val mainState = MainActivityUiState(
+            title = state.workout.name,
+            showsBackButton = true,
+            floatingActionButton = {
+                FloatingActionButton(
+                    icon = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.add_exercise),
+                    onClick = {
+                        onAddExercise(state.workout.id)
+                    }
+                )
+            },
+            topAppBarActions = {
+                if (!state.shouldDisplayEmptyMessage) {
+                    IconButton(
+                        enabled = state.canFinishWorkout,
+                        onClick = onFinishWorkout,
+                        content = {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = stringResource(id = R.string.finish_workout)
+                            )
+                        }
+                    )
                 }
-            )
-        },
-        topAppBarActions = {
-            if (!state.shouldDisplayEmptyMessage) {
-                IconButton(
-                    enabled = state.canFinishWorkout,
-                    onClick = {
-                        onFinishWorkout()
-                        Toast.makeText(context, workoutFinishedSuccessMessage, Toast.LENGTH_LONG).show()
-                        // TODO replace toast with snackbar
-                    },
-                    content = {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = stringResource(id = R.string.finish_workout)
-                        )
-                    }
-                )
-            }
 
-            DropDownMenu(
-                expanded = state.isMenuExpanded,
-                onToggle = onMenuToggle
-            ) {
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.edit)) },
-                    onClick = {
-                        onEditWorkoutClick(state.workout.id)
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.delete)) },
-                    onClick = {
-                        onDeleteWorkoutClicked()
-                        Toast.makeText(context, workoutDeletedSuccessMessage, Toast.LENGTH_SHORT).show()
-                        // TODO replace toast with snackbar
-                    }
-                )
+                DropDownMenu(
+                    expanded = state.isMenuExpanded,
+                    onToggle = onMenuToggle
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.edit)) },
+                        onClick = {
+                            onEditWorkoutClick(state.workout.id)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.delete)) },
+                        onClick = {
+                            onDeleteWorkoutClicked()
+                            showMessage(workoutDeletedSuccessMessage)
+                        }
+                    )
+                }
             }
-        }
-    )
-    setMainActivityState(mainState)
+        )
+        setMainActivityState(mainState)
+    }
 }
 
 @Composable
@@ -132,18 +142,14 @@ fun ExerciseList(
     onIncreaseLoad: (Exercise) -> Unit = {},
     onDecreaseLoad: (Exercise) -> Unit = {},
     onEditExerciseClick: (Exercise) -> Unit = {},
+    onExerciseFinished: () -> Unit = {},
     onSetFinished: (exercise: Exercise.UI, set: Int) -> Unit = { _, _ -> },
+    onWorkoutFinished: () -> Unit = {},
     canFinishWorkout: Boolean = true
 ) {
-    val context = LocalContext.current
-    val successMessage = stringResource(id = R.string.workout_finished)
-
-    // TODO check if this is the best way to do that
     LaunchedEffect(key1 = canFinishWorkout) {
         if (!canFinishWorkout)
-            Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
-
-        // TODO replace toast with snackbar
+            onWorkoutFinished()
     }
 
     LazyColumn(
@@ -155,6 +161,7 @@ fun ExerciseList(
                     onIncreaseLoad = onIncreaseLoad,
                     onDecreaseLoad = onDecreaseLoad,
                     onEditExerciseClick = onEditExerciseClick,
+                    onExerciseFinished = onExerciseFinished,
                     onSetFinished = onSetFinished
                 )
             }
@@ -168,20 +175,13 @@ fun ExerciseItem(
     onIncreaseLoad: (Exercise) -> Unit = {},
     onDecreaseLoad: (Exercise) -> Unit = {},
     onEditExerciseClick: (Exercise) -> Unit = {},
+    onExerciseFinished: () -> Unit = {},
     onSetFinished: (exercise: Exercise.UI, set: Int) -> Unit = { _, _ ->}
 ) {
-    val context = LocalContext.current
 
-    val decreaseLoadSuccessMessage = stringResource(id = R.string.load_decreased)
-    val increaseLoadSuccessMessage = stringResource(id = R.string.load_increased)
-    val exerciseFinishedSuccessMessage = stringResource(id = R.string.exercise_done)
-
-    // TODO check if this is the best way to do that
     LaunchedEffect(key1 = exercise.finished) {
         if (exercise.finished)
-            Toast.makeText(context, exerciseFinishedSuccessMessage, Toast.LENGTH_LONG).show()
-
-        // TODO replace toast with snackbar
+            onExerciseFinished()
     }
 
     Column(
@@ -242,8 +242,6 @@ fun ExerciseItem(
                 modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
                 onClick = {
                     onDecreaseLoad(exercise.original)
-                    Toast.makeText(context, decreaseLoadSuccessMessage, Toast.LENGTH_SHORT).show()
-                    // TODO replace toast with snackbar
                 },
                 icon = Icons.Filled.KeyboardArrowDown,
                 contentDescription = stringResource(id = R.string.decrease_load)
@@ -255,8 +253,6 @@ fun ExerciseItem(
             RoundedButton(
                 onClick = {
                     onIncreaseLoad(exercise.original)
-                    Toast.makeText(context, increaseLoadSuccessMessage, Toast.LENGTH_SHORT).show()
-                    // TODO replace toast with snackbar
                 },
                 icon = Icons.Filled.KeyboardArrowUp,
                 contentDescription = stringResource(id = R.string.increase_weight)

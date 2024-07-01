@@ -14,6 +14,8 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -32,6 +35,7 @@ import br.eti.rafaelcouto.mygympal.R
 import br.eti.rafaelcouto.mygympal.navigation.MyGymPalNavHost
 import br.eti.rafaelcouto.mygympal.presentation.uistate.MainActivityUiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -56,6 +60,8 @@ fun MyGymPalApp(
     navController: NavHostController = rememberNavController()
 ) {
     var mainState by remember { mutableStateOf(MainActivityUiState("")) }
+    val scope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     MyGymPalApp(
         topAppBarTitle = mainState.title ?: stringResource(id = mainState.titleRes),
@@ -63,9 +69,15 @@ fun MyGymPalApp(
         floatingActionButton = mainState.floatingActionButton,
         topAppBarActions = mainState.topAppBarActions,
         onBackButtonPressed = navController::popBackStack,
+        snackbarHostState = snackBarHostState,
         content = {
             MyGymPalNavHost(
                 setMainActivityState = { mainState = it },
+                showMessage = { message ->
+                    scope.launch {
+                        snackBarHostState.showSnackbar(message = message)
+                    }
+                },
                 navController = navController
             )
         }
@@ -80,6 +92,7 @@ fun MyGymPalApp(
     floatingActionButton: @Composable () -> Unit = {},
     topAppBarActions: @Composable RowScope.() -> Unit = {},
     onBackButtonPressed: () -> Unit = {},
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -108,6 +121,7 @@ fun MyGymPalApp(
             floatingActionButton()
         },
         floatingActionButtonPosition = FabPosition.End,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = {
             Box(modifier = Modifier.padding(it)) {
                 content()
