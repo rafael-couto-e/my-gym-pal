@@ -25,7 +25,6 @@ data class Exercise(
     data class UI(
         val original: Exercise,
         val setsState: List<Boolean> = MutableList(original.sets.toInt()) { false }.toList()
-        // TODO check if there is a better way of doing this, maybe moving to UiState
     ) {
 
         val isSameNumberOfReps
