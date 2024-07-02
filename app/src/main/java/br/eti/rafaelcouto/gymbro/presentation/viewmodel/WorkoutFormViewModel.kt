@@ -3,6 +3,7 @@ package br.eti.rafaelcouto.gymbro.presentation.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.eti.rafaelcouto.gymbro.R
 import br.eti.rafaelcouto.gymbro.domain.model.Workout
 import br.eti.rafaelcouto.gymbro.domain.usecase.WorkoutUseCaseAbs
 import br.eti.rafaelcouto.gymbro.navigation.workoutIdArg
@@ -77,7 +78,8 @@ class WorkoutFormViewModel @Inject constructor(
                 it.copy(
                     workoutId = workout.id,
                     workoutName = workout.name,
-                    isButtonEnabled = true
+                    isButtonEnabled = true,
+                    successMessage = R.string.workout_updated
                 )
             }
         }

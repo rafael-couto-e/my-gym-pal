@@ -82,20 +82,15 @@ fun WorkoutItem(
     workout: Workout,
     onItemClick: (Workout) -> Unit = {}
 ) {
-    val itemBackgroundColor = if (workout.isLast)
-        colorResource(id = R.color.mediumGrey)
+    val (backgroundColor, fontWeight) = if (workout.isLast)
+        colorResource(id = R.color.mediumGrey) to FontWeight.Bold
     else
-        Color.Transparent
-
-    val itemFontWeight = if (workout.isLast)
-        FontWeight.Bold
-    else
-        FontWeight.Normal
+        Color.Transparent to FontWeight.Normal
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = itemBackgroundColor)
+            .background(color = backgroundColor)
             .clickable { onItemClick(workout) },
         content = {
             Text(
@@ -106,7 +101,7 @@ fun WorkoutItem(
                         vertical = dimensionResource(id = R.dimen.padding_p)
                     ),
                 text = workout.name,
-                fontWeight = itemFontWeight
+                fontWeight = fontWeight
             )
         }
     )

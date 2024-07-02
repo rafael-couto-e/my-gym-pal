@@ -53,11 +53,13 @@ fun ExerciseListScreen(
     state: ExerciseListUiState = ExerciseListUiState()
 ) {
 
-    val exerciseFinishedSuccessMessage = stringResource(id = R.string.exercise_done)
-    val decreaseLoadSuccessMessage = stringResource(id = R.string.load_decreased)
-    val increaseLoadSuccessMessage = stringResource(id = R.string.load_increased)
     val workoutDeletedSuccessMessage = stringResource(id = R.string.workout_deleted)
     val workoutFinishedSuccessMessage = stringResource(id = R.string.workout_finished)
+
+    LaunchedEffect(key1 = state.canFinishWorkout) {
+        if (!state.canFinishWorkout)
+            showMessage(workoutFinishedSuccessMessage)
+    }
 
     if (state.shouldDisplayEmptyMessage)
         EmptyMessage(
@@ -66,23 +68,10 @@ fun ExerciseListScreen(
 
     ExerciseList(
         exercises = state.exercises,
-        onIncreaseLoad = {
-            onIncreaseLoad(it)
-            showMessage(increaseLoadSuccessMessage)
-        },
-        onDecreaseLoad = {
-            onDecreaseLoad(it)
-            showMessage(decreaseLoadSuccessMessage)
-        },
+        onIncreaseLoad = onIncreaseLoad,
+        onDecreaseLoad = onDecreaseLoad,
         onEditExerciseClick = onEditExerciseClick,
-        onExerciseFinished = {
-            showMessage(exerciseFinishedSuccessMessage)
-        },
-        onSetFinished = onSetFinshed,
-        onWorkoutFinished = {
-            showMessage(workoutFinishedSuccessMessage)
-        },
-        canFinishWorkout = state.canFinishWorkout
+        onSetFinished = onSetFinshed
     )
 
     LaunchedEffect(
@@ -104,7 +93,7 @@ fun ExerciseListScreen(
                     )
                 },
                 topAppBarActions = {
-                    if (!state.shouldDisplayEmptyMessage) {
+                    if (!state.shouldDisplayEmptyMessage)
                         IconButton(
                             enabled = state.canFinishWorkout,
                             onClick = onFinishWorkout,
@@ -115,7 +104,6 @@ fun ExerciseListScreen(
                                 )
                             }
                         )
-                    }
 
                     DropDownMenu(
                         expanded = state.isMenuExpanded,
@@ -149,15 +137,8 @@ fun ExerciseList(
     onIncreaseLoad: (Exercise) -> Unit = {},
     onDecreaseLoad: (Exercise) -> Unit = {},
     onEditExerciseClick: (Exercise) -> Unit = {},
-    onExerciseFinished: () -> Unit = {},
-    onSetFinished: (exercise: Exercise.UI, set: Int) -> Unit = { _, _ -> },
-    onWorkoutFinished: () -> Unit = {},
-    canFinishWorkout: Boolean = true
+    onSetFinished: (exercise: Exercise.UI, set: Int) -> Unit = { _, _ -> }
 ) {
-    LaunchedEffect(key1 = canFinishWorkout) {
-        if (!canFinishWorkout)
-            onWorkoutFinished()
-    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -168,7 +149,6 @@ fun ExerciseList(
                     onIncreaseLoad = onIncreaseLoad,
                     onDecreaseLoad = onDecreaseLoad,
                     onEditExerciseClick = onEditExerciseClick,
-                    onExerciseFinished = onExerciseFinished,
                     onSetFinished = onSetFinished
                 )
             }
@@ -182,14 +162,8 @@ fun ExerciseItem(
     onIncreaseLoad: (Exercise) -> Unit = {},
     onDecreaseLoad: (Exercise) -> Unit = {},
     onEditExerciseClick: (Exercise) -> Unit = {},
-    onExerciseFinished: () -> Unit = {},
     onSetFinished: (exercise: Exercise.UI, set: Int) -> Unit = { _, _ ->}
 ) {
-
-    LaunchedEffect(key1 = exercise.finished) {
-        if (exercise.finished)
-            onExerciseFinished()
-    }
 
     Column(
         modifier = Modifier
@@ -278,10 +252,13 @@ fun ExerciseItem(
                     text = stringResource(id = R.string.sets_done)
                 )
                 exercise.setsState.forEachIndexed { index, value ->
+                    val paddingStart = if (index == 0)
+                        0.dp
+                    else
+                        dimensionResource(id = R.dimen.padding_p)
+
                     Checkbox(
-                        modifier = Modifier.padding(
-                            start = if (index == 0) 0.dp else dimensionResource(id = R.dimen.padding_p)
-                        ),
+                        modifier = Modifier.padding(start = paddingStart),
                         checked = value,
                         onCheckedChange = {
                             onSetFinished(exercise, index)

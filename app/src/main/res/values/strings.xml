@@ -24,10 +24,7 @@
     <string name="edit_exercise">Editar exercício</string>
     <string name="increase_weight">Aumentar carga</string>
     <string name="decrease_load">Reduzir carga</string>
-    <string name="load_decreased">Carga reduzida</string>
-    <string name="load_increased">Carga aumentada</string>
     <string name="load_kg">%1$dkg</string>
-    <string name="exercise_done">Exercício concluído!</string>
     <string name="create_exercise">Criar exercício</string>
     <string name="exercise_deleted">Exercício excluído!</string>
     <string name="delete_exercise">Excluir exercício</string>

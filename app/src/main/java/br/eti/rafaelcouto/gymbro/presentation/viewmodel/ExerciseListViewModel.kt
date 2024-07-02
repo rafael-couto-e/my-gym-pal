@@ -89,8 +89,20 @@ class ExerciseListViewModel @Inject constructor(
             exerciseUseCase.getAllExercises(workoutId).collect { exercises ->
                 _uiState.update { state ->
                     state.copy(
-                        exercises = exercises
-                        // TODO keep sets state after loading
+                        exercises = exercises.map { exercise ->
+                            val currentExercise = state.exercises.firstOrNull {
+                                it.original.id == exercise.original.id
+                            } ?: return@map exercise
+
+                            exercise.copy(
+                                setsState = exercise.setsState.mapIndexed { index, setState ->
+                                    if (index < currentExercise.original.sets)
+                                        currentExercise.setsState[index]
+                                    else
+                                        setState
+                                }
+                            )
+                        }
                     )
                 }
             }
