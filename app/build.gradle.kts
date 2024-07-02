@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "br.eti.rafaelcouto.mygympal"
+    namespace = "br.eti.rafaelcouto.gymbro"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "br.eti.rafaelcouto.mygympal"
+        applicationId = "br.eti.rafaelcouto.gymbro"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
