@@ -27,9 +27,8 @@ class WorkoutUseCase @Inject constructor(
 
         if (node.value.isLast) {
             val newLast = node.next?.value
-            newLast?.let {
-                it.isLast = true
-                updateWorkout(it)
+            newLast?.let { workout ->
+                updateWorkout(workout.copy(isLast = true))
             }
         }
 
@@ -45,10 +44,7 @@ class WorkoutUseCase @Inject constructor(
 
         if (currentLastWorkout.id == nextWorkout.id) return
 
-        nextWorkout.isLast = true
-        updateWorkout(nextWorkout)
-
-        currentLastWorkout.isLast = false
-        updateWorkout(currentLastWorkout)
+        updateWorkout(nextWorkout.copy(isLast = true))
+        updateWorkout(currentLastWorkout.copy(isLast = false))
     }
 }
