@@ -22,7 +22,7 @@ class WorkoutUseCase @Inject constructor(
     override suspend fun updateWorkout(workout: Workout) = repository.updateWorkout(workout)
     override suspend fun deleteWorkout(id: Long) {
         val node = getAllWorkouts().map { workouts ->
-            workouts.first { it.value.id == id }
+            workouts.first { it.id == id }
         }.first()
 
         if (node.value.isLast) {
@@ -39,19 +39,16 @@ class WorkoutUseCase @Inject constructor(
     override suspend fun finishWorkout(id: Long) {
         val workouts = getAllWorkouts().first()
 
-        val workout = workouts.firstOrNull { it.value.id == id } ?: return
-        val last = workouts.first { it.value.isLast }
+        val finishedWorkout = workouts.firstOrNull { it.id == id } ?: return
+        val nextWorkout = finishedWorkout.next?.value ?: return
+        val currentLastWorkout = workouts.first { it.isLast }.value
 
-        workout.value.isLast = false
-        last.value.isLast = false
-        workout.next?.value?.isLast = true
+        if (currentLastWorkout.id == nextWorkout.id) return
 
-        updateWorkout(workout.value)
+        nextWorkout.isLast = true
+        updateWorkout(nextWorkout)
 
-        workout.next?.value?.let {
-            updateWorkout(it)
-        }
-
-        updateWorkout(last.value)
+        currentLastWorkout.isLast = false
+        updateWorkout(currentLastWorkout)
     }
 }

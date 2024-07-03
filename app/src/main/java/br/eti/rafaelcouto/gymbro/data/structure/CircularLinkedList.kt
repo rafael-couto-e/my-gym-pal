@@ -17,9 +17,7 @@ class CircularLinkedList<T> {
         content.add(node)
     }
 
-    fun addAll(collection: List<T>) = collection.forEach {
-        add(it)
-    }
+    fun addAll(collection: List<T>) = collection.forEach(::add)
 
     fun add(index: Int, element: T) {
         if (index < 0) {
@@ -34,13 +32,15 @@ class CircularLinkedList<T> {
 
         var node = Node(element)
 
+        content.add(index, node)
+
         if (index != 0) {
             val previous = content[index - 1]
             previous.next = node
         }
 
         for (i in index until content.size) {
-            val current = content[index]
+            val current = content[i]
 
             node.next = current
             node = current
@@ -58,7 +58,13 @@ class CircularLinkedList<T> {
         if (index < 0 || index >= content.size) return false
 
         if (index == 0 || index == content.size - 1) {
-            content.lastOrNull()?.next = content.firstOrNull()
+            content.removeAt(index)
+
+            content.lastOrNull()?.next = if (content.size != 1)
+                content.firstOrNull()
+            else
+                null
+
             return true
         }
 
@@ -70,14 +76,10 @@ class CircularLinkedList<T> {
         return true
     }
 
-    fun clear() = content.clear()
-    fun first(predicate: (Node<T>) -> Boolean) = content.first { predicate(it) }
-    fun firstOrNull() = content.firstOrNull()
-    fun firstOrNull(predicate: (Node<T>) -> Boolean) = content.firstOrNull { predicate(it) }
-    fun lastOrNull() = content.lastOrNull()
-    fun filter(predicate: (Node<T>) -> Boolean) = content.filter(predicate)
+    fun first(predicate: (T) -> Boolean) = content.first { predicate(it.value) }
+    fun firstOrNull(predicate: (T) -> Boolean) = content.firstOrNull { predicate(it.value) }
+    fun filter(predicate: (T) -> Boolean) = content.filter { predicate(it.value) }
     fun isEmpty() = content.isEmpty()
-    fun isNotEmpty() = !isEmpty()
 
     operator fun get(index: Int) = content[index]
 }

@@ -8,4 +8,5 @@ data class Workout(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String = "",
     var isLast: Boolean = false
+    // TODO make immutable
 )

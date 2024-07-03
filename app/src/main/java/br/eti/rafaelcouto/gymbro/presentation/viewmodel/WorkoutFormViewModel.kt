@@ -54,7 +54,7 @@ class WorkoutFormViewModel @Inject constructor(
                     useCase.updateWorkout(workout)
                 } else {
                     val lastWorkout = useCase.getAllWorkouts().map { workouts ->
-                        workouts.filter { it.value.isLast }.firstOrNull()
+                        workouts.filter { it.isLast }.firstOrNull()
                     }.first()
 
                     val workout = Workout(
