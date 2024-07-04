@@ -62,8 +62,27 @@ class ExerciseFormViewModel @Inject constructor(
                 }
             )
         }
+    }
 
-        getExercise()
+    fun loadContent() {
+        val exerciseId: Long = savedStateHandle.get<Long>(exerciseIdArg)?.takeIf { it != 0L } ?: return
+
+        viewModelScope.launch {
+            val exercise = useCase.findExerciseById(exerciseId) ?: return@launch
+
+            _uiState.update { state ->
+                state.copy(
+                    exerciseId = exerciseId,
+                    exerciseName = exercise.name,
+                    numberOfSets = exercise.sets.toString(),
+                    minReps = exercise.minReps.toString(),
+                    maxReps = exercise.maxReps.toString(),
+                    load = exercise.load.toString(),
+                    isButtonEnabled = true,
+                    successMessage = R.string.exercise_updated
+                )
+            }
+        }
     }
 
     fun saveExercise() {
@@ -92,27 +111,6 @@ class ExerciseFormViewModel @Inject constructor(
     fun deleteExercise() {
         viewModelScope.launch {
             useCase.deleteExercise(_uiState.value.exerciseId)
-        }
-    }
-
-    private fun getExercise() {
-        val exerciseId: Long = savedStateHandle[exerciseIdArg] ?: return
-
-        viewModelScope.launch {
-            val exercise = useCase.findExerciseById(exerciseId) ?: return@launch
-
-            _uiState.update { state ->
-                state.copy(
-                    exerciseId = exerciseId,
-                    exerciseName = exercise.name,
-                    numberOfSets = exercise.sets.toString(),
-                    minReps = exercise.minReps.toString(),
-                    maxReps = exercise.maxReps.toString(),
-                    load = exercise.load.toString(),
-                    isButtonEnabled = true,
-                    successMessage = R.string.exercise_updated
-                )
-            }
         }
     }
 

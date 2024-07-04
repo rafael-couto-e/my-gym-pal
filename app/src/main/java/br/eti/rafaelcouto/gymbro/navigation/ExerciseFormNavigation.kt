@@ -1,5 +1,6 @@
 package br.eti.rafaelcouto.gymbro.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +37,8 @@ fun NavGraphBuilder.exerciseFormScreen(
     ) {
         val viewModel: ExerciseFormViewModel = hiltViewModel()
         val state by viewModel.uiState.collectAsState()
+
+        LaunchedEffect(Unit) { viewModel.loadContent() }
 
         ExerciseFormScreen(
             onSaveExercise = {

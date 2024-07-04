@@ -28,7 +28,7 @@ object TestUtils {
         maxReps: Byte = 12,
         load: Short = 20,
         workoutId: Long = 0,
-        setsState: List<Boolean> = emptyList()
+        setsState: List<Boolean> = MutableList(sets.toInt()) { false }.toList()
     ) = Exercise.UI(
         Exercise(id, name, sets, minReps, maxReps, load, workoutId),
         setsState

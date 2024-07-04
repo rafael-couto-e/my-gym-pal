@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExerciseListViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val exerciseUseCase: ExerciseUseCaseAbs,
     private val workoutUseCase: WorkoutUseCaseAbs
 ) : ViewModel() {
@@ -26,11 +26,11 @@ class ExerciseListViewModel @Inject constructor(
     val uiState
         get() = _uiState.asStateFlow()
 
-    val workoutId: Long = requireNotNull(savedStateHandle[workoutIdArg])
+    fun loadContent() {
+        val workoutId: Long = requireNotNull(savedStateHandle[workoutIdArg])
 
-    init {
-        loadExercises()
-        loadWorkout()
+        loadExercises(workoutId)
+        loadWorkout(workoutId)
     }
 
     fun increaseLoad(exercise: Exercise) {
@@ -69,7 +69,7 @@ class ExerciseListViewModel @Inject constructor(
 
     fun deleteWorkout() {
         viewModelScope.launch {
-            workoutUseCase.deleteWorkout(workoutId)
+            workoutUseCase.deleteWorkout(_uiState.value.workout.id)
         }
     }
 
@@ -84,7 +84,7 @@ class ExerciseListViewModel @Inject constructor(
         }
     }
 
-    private fun loadExercises() {
+    private fun loadExercises(workoutId: Long) {
         viewModelScope.launch {
             exerciseUseCase.getAllExercises(workoutId).collect { exercises ->
                 _uiState.update { state ->
@@ -109,7 +109,7 @@ class ExerciseListViewModel @Inject constructor(
         }
     }
 
-    private fun loadWorkout() {
+    private fun loadWorkout(workoutId: Long) {
         viewModelScope.launch {
             workoutUseCase.getWorkoutByIdAsFlow(workoutId).collect {
                 it?.let { workout ->
@@ -136,7 +136,7 @@ class ExerciseListViewModel @Inject constructor(
 
     private fun updateLastWorkout() {
         viewModelScope.launch {
-            workoutUseCase.finishWorkout(workoutId)
+            workoutUseCase.finishWorkout(_uiState.value.workout.id)
         }
     }
 

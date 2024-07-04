@@ -20,11 +20,7 @@ class WorkoutListViewModel @Inject constructor(
     val uiState
         get() = _uiState.asStateFlow()
 
-    init {
-        getWorkouts()
-    }
-
-    private fun getWorkouts() {
+    fun loadContent() {
         viewModelScope.launch {
             useCase.getAllWorkouts().collect { workouts ->
                 _uiState.update { state ->

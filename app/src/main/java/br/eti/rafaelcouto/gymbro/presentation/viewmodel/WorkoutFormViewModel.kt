@@ -40,36 +40,10 @@ class WorkoutFormViewModel @Inject constructor(
                 }
             )
         }
-
-        getWorkout()
     }
 
-    fun saveWorkout() {
-        viewModelScope.launch {
-            with (_uiState.value) {
-                if (workoutId != 0L) {
-                    val workout = useCase.getWorkoutById(workoutId)
-                        ?.copy(name = workoutName) ?: return@launch
-
-                    useCase.updateWorkout(workout)
-                } else {
-                    val lastWorkout = useCase.getAllWorkouts().map { workouts ->
-                        workouts.filter { it.isLast }.firstOrNull()
-                    }.first()
-
-                    val workout = Workout(
-                        name = workoutName.trim(),
-                        isLast = lastWorkout == null
-                    )
-
-                    useCase.createWorkout(workout)
-                }
-            }
-        }
-    }
-
-    private fun getWorkout() {
-        val workoutId: Long = savedStateHandle[workoutIdArg] ?: return
+    fun loadContent() {
+        val workoutId = savedStateHandle.get<Long>(workoutIdArg)?.takeIf { it != 0L } ?: return
 
         viewModelScope.launch {
             val workout = useCase.getWorkoutById(workoutId) ?: return@launch
@@ -82,6 +56,37 @@ class WorkoutFormViewModel @Inject constructor(
                     successMessage = R.string.workout_updated
                 )
             }
+        }
+    }
+
+    fun saveWorkout() {
+        if (_uiState.value.workoutId != 0L)
+            updateWorkout()
+        else
+            createWorkout()
+    }
+
+    private fun updateWorkout() {
+        viewModelScope.launch {
+            val workout = useCase.getWorkoutById(_uiState.value.workoutId)
+                ?.copy(name = _uiState.value.workoutName) ?: return@launch
+
+            useCase.updateWorkout(workout)
+        }
+    }
+
+    private fun createWorkout() {
+        viewModelScope.launch {
+            val lastWorkout = useCase.getAllWorkouts().map { workouts ->
+                workouts.filter { it.isLast }.firstOrNull()
+            }.first()
+
+            val workout = Workout(
+                name = _uiState.value.workoutName.trim(),
+                isLast = lastWorkout == null
+            )
+
+            useCase.createWorkout(workout)
         }
     }
 }
