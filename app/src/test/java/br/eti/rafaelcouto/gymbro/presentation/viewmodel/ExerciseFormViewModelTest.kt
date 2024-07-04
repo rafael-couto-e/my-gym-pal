@@ -41,12 +41,14 @@ class ExerciseFormViewModelTest {
 
     @Test
     fun onValueChangeTest() = runTest {
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
+        with (sut.uiState.value) {
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+        }
 
         sut.uiState.value.onExerciseNameChange("test")
         assertThat(sut.uiState.value.isButtonEnabled).isFalse()
@@ -59,36 +61,42 @@ class ExerciseFormViewModelTest {
         sut.uiState.value.onLoadChange("50")
         assertThat(sut.uiState.value.isButtonEnabled).isTrue()
 
-        assertThat(sut.uiState.value.exerciseName).isEqualTo("test")
-        assertThat(sut.uiState.value.numberOfSets).isEqualTo("4")
-        assertThat(sut.uiState.value.minReps).isEqualTo("10")
-        assertThat(sut.uiState.value.maxReps).isEqualTo("10")
-        assertThat(sut.uiState.value.load).isEqualTo("50")
+        with (sut.uiState.value) {
+            assertThat(exerciseName).isEqualTo("test")
+            assertThat(numberOfSets).isEqualTo("4")
+            assertThat(minReps).isEqualTo("10")
+            assertThat(maxReps).isEqualTo("10")
+            assertThat(load).isEqualTo("50")
+        }
     }
 
     @Test
     fun loadContentNoIdTest() = runTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(0)
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(0)
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_created)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(0)
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.exercise_created)
+        }
 
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(0)
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_created)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(0)
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.exercise_created)
+        }
 
         verify { mockSavedStateHandle.get<Long>("exerciseId") }
         coVerify(inverse = true) { mockExerciseUseCase.findExerciseById(any()) }
@@ -99,25 +107,29 @@ class ExerciseFormViewModelTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1)
         coEvery { mockExerciseUseCase.findExerciseById(any()) }.returns(null)
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(0)
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_created)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(0)
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.exercise_created)
+        }
 
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(0)
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_created)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(0)
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.exercise_created)
+        }
 
         verify { mockSavedStateHandle.get<Long>("exerciseId") }
         coVerify { mockExerciseUseCase.findExerciseById(1) }
@@ -129,25 +141,29 @@ class ExerciseFormViewModelTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1)
         coEvery { mockExerciseUseCase.findExerciseById(any()) }.returns(expected)
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(0)
-        assertThat(sut.uiState.value.exerciseName).isEmpty()
-        assertThat(sut.uiState.value.numberOfSets).isEmpty()
-        assertThat(sut.uiState.value.minReps).isEmpty()
-        assertThat(sut.uiState.value.maxReps).isEmpty()
-        assertThat(sut.uiState.value.load).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_created)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(0)
+            assertThat(exerciseName).isEmpty()
+            assertThat(numberOfSets).isEmpty()
+            assertThat(minReps).isEmpty()
+            assertThat(maxReps).isEmpty()
+            assertThat(load).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.exercise_created)
+        }
 
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exerciseId).isEqualTo(expected.id)
-        assertThat(sut.uiState.value.exerciseName).isEqualTo(expected.name)
-        assertThat(sut.uiState.value.numberOfSets).isEqualTo(expected.sets.toString())
-        assertThat(sut.uiState.value.minReps).isEqualTo(expected.minReps.toString())
-        assertThat(sut.uiState.value.maxReps).isEqualTo(expected.maxReps.toString())
-        assertThat(sut.uiState.value.load).isEqualTo(expected.load.toString())
-        assertThat(sut.uiState.value.isButtonEnabled).isTrue()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.exercise_updated)
+        with (sut.uiState.value) {
+            assertThat(exerciseId).isEqualTo(expected.id)
+            assertThat(exerciseName).isEqualTo(expected.name)
+            assertThat(numberOfSets).isEqualTo(expected.sets.toString())
+            assertThat(minReps).isEqualTo(expected.minReps.toString())
+            assertThat(maxReps).isEqualTo(expected.maxReps.toString())
+            assertThat(load).isEqualTo(expected.load.toString())
+            assertThat(isButtonEnabled).isTrue()
+            assertThat(successMessage).isEqualTo(R.string.exercise_updated)
+        }
 
         verify { mockSavedStateHandle.get<Long>("exerciseId") }
         coVerify { mockExerciseUseCase.findExerciseById(1) }
@@ -179,11 +195,13 @@ class ExerciseFormViewModelTest {
             load = 50,
             workoutId = 1
         )
-        sut.uiState.value.onExerciseNameChange(input.name)
-        sut.uiState.value.onNumberOfSetsChange(input.sets.toString())
-        sut.uiState.value.onMinRepsChange(input.minReps.toString())
-        sut.uiState.value.onMaxRepsChange(input.maxReps.toString())
-        sut.uiState.value.onLoadChange(input.load.toString())
+        with (sut.uiState.value) {
+            onExerciseNameChange(input.name)
+            onNumberOfSetsChange(input.sets.toString())
+            onMinRepsChange(input.minReps.toString())
+            onMaxRepsChange(input.maxReps.toString())
+            onLoadChange(input.load.toString())
+        }
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1)
 
         sut.saveExercise()

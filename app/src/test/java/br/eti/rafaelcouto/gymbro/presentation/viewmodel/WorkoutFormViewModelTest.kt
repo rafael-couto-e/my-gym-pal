@@ -44,46 +44,58 @@ class WorkoutFormViewModelTest {
 
     @Test
     fun onWorkoutNameChangedTest() = runTest {
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
+        with (sut.uiState.value) {
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
 
-        sut.uiState.value.onWorkoutNameChanged("Workout")
+            onWorkoutNameChanged("Workout")
+        }
 
-        assertThat(sut.uiState.value.workoutName).isEqualTo("Workout")
-        assertThat(sut.uiState.value.isButtonEnabled).isTrue()
+        with (sut.uiState.value) {
+            assertThat(workoutName).isEqualTo("Workout")
+            assertThat(isButtonEnabled).isTrue()
 
-        sut.uiState.value.onWorkoutNameChanged("")
+            onWorkoutNameChanged("")
+        }
 
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
+        with (sut.uiState.value) {
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+        }
     }
 
     @Test
     fun loadContentNoIdTest() = runTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(null)
-        assertThat(sut.uiState.value.workoutId).isEqualTo(0)
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.workout_created)
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(0)
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.workout_created)
+        }
 
         sut.loadContent()
 
         verify { mockSavedStateHandle.get<Long>("workoutId") }
         coVerify(inverse = true) { mockUseCase.getWorkoutById(any()) }
-        assertThat(sut.uiState.value.workoutId).isEqualTo(0)
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.workout_created)
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(0)
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.workout_created)
+        }
     }
 
     @Test
     fun loadContentNoWorkoutTest() = runTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1L)
         coEvery { mockUseCase.getWorkoutById(any()) }.returns(null)
-        assertThat(sut.uiState.value.workoutId).isEqualTo(0)
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.workout_created)
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(0)
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.workout_created)
+        }
 
         sut.loadContent()
 
@@ -100,19 +112,23 @@ class WorkoutFormViewModelTest {
         val expected = TestUtils.generateWorkout(id = 1)
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1L)
         coEvery { mockUseCase.getWorkoutById(any()) }.returns(expected)
-        assertThat(sut.uiState.value.workoutId).isEqualTo(0)
-        assertThat(sut.uiState.value.workoutName).isEmpty()
-        assertThat(sut.uiState.value.isButtonEnabled).isFalse()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.workout_created)
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(0)
+            assertThat(workoutName).isEmpty()
+            assertThat(isButtonEnabled).isFalse()
+            assertThat(successMessage).isEqualTo(R.string.workout_created)
+        }
 
         sut.loadContent()
 
         verify { mockSavedStateHandle.get<Long>("workoutId") }
         coVerify { mockUseCase.getWorkoutById(1) }
-        assertThat(sut.uiState.value.workoutId).isEqualTo(expected.id)
-        assertThat(sut.uiState.value.workoutName).isEqualTo(expected.name)
-        assertThat(sut.uiState.value.isButtonEnabled).isTrue()
-        assertThat(sut.uiState.value.successMessage).isEqualTo(R.string.workout_updated)
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(expected.id)
+            assertThat(workoutName).isEqualTo(expected.name)
+            assertThat(isButtonEnabled).isTrue()
+            assertThat(successMessage).isEqualTo(R.string.workout_updated)
+        }
     }
 
     @Test
@@ -122,10 +138,14 @@ class WorkoutFormViewModelTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1L)
         coEvery { mockUseCase.getWorkoutById(any()) }.returns(expected)
         sut.loadContent()
-        assertThat(sut.uiState.value.workoutId).isEqualTo(1)
-        assertThat(sut.uiState.value.workoutName).isEqualTo("Workout 1")
 
-        sut.uiState.value.onWorkoutNameChanged("test")
+        with (sut.uiState.value) {
+            assertThat(workoutId).isEqualTo(1)
+            assertThat(workoutName).isEqualTo("Workout 1")
+
+            onWorkoutNameChanged("test")
+        }
+
         sut.saveWorkout()
 
         coVerify(inverse = true) { mockUseCase.createWorkout(any()) }

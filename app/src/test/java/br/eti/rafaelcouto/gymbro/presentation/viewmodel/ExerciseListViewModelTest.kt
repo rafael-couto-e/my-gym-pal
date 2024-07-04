@@ -50,19 +50,23 @@ class ExerciseListViewModelTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1L)
         every { mockExerciseUseCase.getAllExercises(any()) }.returns(flowOf(emptyList()))
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(expectedWorkout))
-        assertThat(sut.uiState.value.exercises).isEmpty()
-        assertThat(sut.uiState.value.workout.id).isEqualTo(0)
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
-        assertThat(sut.uiState.value.isMenuExpanded).isFalse()
-        assertThat(sut.uiState.value.shouldDisplayEmptyMessage).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).isEmpty()
+            assertThat(workout.id).isEqualTo(0)
+            assertThat(canFinishWorkout).isTrue()
+            assertThat(isMenuExpanded).isFalse()
+            assertThat(shouldDisplayEmptyMessage).isTrue()
+        }
 
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exercises).isEmpty()
-        assertThat(sut.uiState.value.workout).isEqualTo(expectedWorkout)
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
-        assertThat(sut.uiState.value.isMenuExpanded).isFalse()
-        assertThat(sut.uiState.value.shouldDisplayEmptyMessage).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).isEmpty()
+            assertThat(workout).isEqualTo(expectedWorkout)
+            assertThat(canFinishWorkout).isTrue()
+            assertThat(isMenuExpanded).isFalse()
+            assertThat(shouldDisplayEmptyMessage).isTrue()
+        }
         verify { mockExerciseUseCase.getAllExercises(1) }
         verify { mockWorkoutUseCase.getWorkoutByIdAsFlow(1) }
     }
@@ -78,19 +82,23 @@ class ExerciseListViewModelTest {
         every { mockSavedStateHandle.get<Long>(any()) }.returns(1L)
         every { mockExerciseUseCase.getAllExercises(any()) }.returns(flowOf(expectedExercises))
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(expectedWorkout))
-        assertThat(sut.uiState.value.exercises).isEmpty()
-        assertThat(sut.uiState.value.workout.id).isEqualTo(0)
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
-        assertThat(sut.uiState.value.isMenuExpanded).isFalse()
-        assertThat(sut.uiState.value.shouldDisplayEmptyMessage).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).isEmpty()
+            assertThat(workout.id).isEqualTo(0)
+            assertThat(canFinishWorkout).isTrue()
+            assertThat(isMenuExpanded).isFalse()
+            assertThat(shouldDisplayEmptyMessage).isTrue()
+        }
 
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exercises).isEqualTo(expectedExercises)
-        assertThat(sut.uiState.value.workout).isEqualTo(expectedWorkout)
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
-        assertThat(sut.uiState.value.isMenuExpanded).isFalse()
-        assertThat(sut.uiState.value.shouldDisplayEmptyMessage).isFalse()
+        with (sut.uiState.value) {
+            assertThat(exercises).isEqualTo(expectedExercises)
+            assertThat(workout).isEqualTo(expectedWorkout)
+            assertThat(canFinishWorkout).isTrue()
+            assertThat(isMenuExpanded).isFalse()
+            assertThat(shouldDisplayEmptyMessage).isFalse()
+        }
         verify { mockExerciseUseCase.getAllExercises(1) }
         verify { mockWorkoutUseCase.getWorkoutByIdAsFlow(1) }
     }
@@ -124,17 +132,22 @@ class ExerciseListViewModelTest {
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(TestUtils.generateWorkout(id = 1)))
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exercises).hasSize(2)
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).hasSize(2)
+            assertThat(exercises[0].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(canFinishWorkout).isTrue()
+        }
 
         sut.finishSet(expectedExercises[0], 0)
         sut.finishSet(expectedExercises[1], 1)
 
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(true, false, false))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, true, false))
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises[0].setsState).isEqualTo(listOf(true, false, false))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, true, false))
+            assertThat(canFinishWorkout).isTrue()
+        }
+
         coVerify(inverse = true) { mockWorkoutUseCase.finishWorkout(any()) }
     }
 
@@ -149,10 +162,12 @@ class ExerciseListViewModelTest {
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(TestUtils.generateWorkout(id = 1)))
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exercises).hasSize(2)
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).hasSize(2)
+            assertThat(exercises[0].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(canFinishWorkout).isTrue()
+        }
 
         sut.finishSet(expectedExercises[0], 0)
         sut.finishSet(expectedExercises[0], 1)
@@ -161,9 +176,11 @@ class ExerciseListViewModelTest {
         sut.finishSet(expectedExercises[1], 1)
         sut.finishSet(expectedExercises[1], 2)
 
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(true, true, true))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(true, true, true))
-        assertThat(sut.uiState.value.canFinishWorkout).isFalse()
+        with (sut.uiState.value) {
+            assertThat(exercises[0].setsState).isEqualTo(listOf(true, true, true))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(true, true, true))
+            assertThat(canFinishWorkout).isFalse()
+        }
         coVerify { mockWorkoutUseCase.finishWorkout(1) }
     }
 
@@ -190,16 +207,20 @@ class ExerciseListViewModelTest {
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(TestUtils.generateWorkout(id = 1)))
         sut.loadContent()
 
-        assertThat(sut.uiState.value.exercises).hasSize(2)
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, false, false))
-        assertThat(sut.uiState.value.canFinishWorkout).isTrue()
+        with (sut.uiState.value) {
+            assertThat(exercises).hasSize(2)
+            assertThat(exercises[0].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, false, false))
+            assertThat(canFinishWorkout).isTrue()
+        }
 
         sut.finishWorkout()
 
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(true, true, true))
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(true, true, true))
-        assertThat(sut.uiState.value.canFinishWorkout).isFalse()
+        with (sut.uiState.value) {
+            assertThat(exercises[0].setsState).isEqualTo(listOf(true, true, true))
+            assertThat(exercises[1].setsState).isEqualTo(listOf(true, true, true))
+            assertThat(canFinishWorkout).isFalse()
+        }
         coVerify { mockWorkoutUseCase.finishWorkout(1) }
     }
 
@@ -219,7 +240,7 @@ class ExerciseListViewModelTest {
 
     @Test
     fun updateExercisesAndKeepSetsStateTest() = runTest {
-        val exercises = listOf(
+        val expectedExercises = listOf(
             TestUtils.generateExerciseUi(id = 1, workoutId = 1),
             TestUtils.generateExerciseUi(id = 2, workoutId = 1),
             TestUtils.generateExerciseUi(id = 3, workoutId = 1)
@@ -229,31 +250,35 @@ class ExerciseListViewModelTest {
         every { mockExerciseUseCase.getAllExercises(any()) }.returns(exercisesFlow)
         every { mockWorkoutUseCase.getWorkoutByIdAsFlow(any()) }.returns(flowOf(TestUtils.generateWorkout(id = 1)))
         sut.loadContent()
-        exercisesFlow.emit(exercises)
-        sut.finishSet(exercises[0], 0)
-        sut.finishSet(exercises[1], 1)
-        sut.finishSet(exercises[2], 1)
-        sut.finishSet(exercises[2], 2)
+        exercisesFlow.emit(expectedExercises)
+        sut.finishSet(expectedExercises[0], 0)
+        sut.finishSet(expectedExercises[1], 1)
+        sut.finishSet(expectedExercises[2], 1)
+        sut.finishSet(expectedExercises[2], 2)
 
-        assertThat(sut.uiState.value.exercises[0].original.load).isEqualTo(20)
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(true, false, false))
-        assertThat(sut.uiState.value.exercises[1].original.sets).isEqualTo(3)
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, true, false))
-        assertThat(sut.uiState.value.exercises[2].original.sets).isEqualTo(3)
-        assertThat(sut.uiState.value.exercises[2].setsState).isEqualTo(listOf(false, true, true))
+        with (sut.uiState.value) {
+            assertThat(exercises[0].original.load).isEqualTo(20)
+            assertThat(exercises[0].setsState).isEqualTo(listOf(true, false, false))
+            assertThat(exercises[1].original.sets).isEqualTo(3)
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, true, false))
+            assertThat(exercises[2].original.sets).isEqualTo(3)
+            assertThat(exercises[2].setsState).isEqualTo(listOf(false, true, true))
+        }
 
-        val expectedExercises = listOf(
+        val updatedExercises = listOf(
             TestUtils.generateExerciseUi(id = 1, load = 21, workoutId = 1),
             TestUtils.generateExerciseUi(id = 2, sets = 4, workoutId = 1),
             TestUtils.generateExerciseUi(id = 3, sets = 2, workoutId = 1)
         )
-        exercisesFlow.emit(expectedExercises)
+        exercisesFlow.emit(updatedExercises)
 
-        assertThat(sut.uiState.value.exercises[0].original.load).isEqualTo(21)
-        assertThat(sut.uiState.value.exercises[0].setsState).isEqualTo(listOf(true, false, false))
-        assertThat(sut.uiState.value.exercises[1].original.sets).isEqualTo(4)
-        assertThat(sut.uiState.value.exercises[1].setsState).isEqualTo(listOf(false, true, false, false))
-        assertThat(sut.uiState.value.exercises[2].original.sets).isEqualTo(2)
-        assertThat(sut.uiState.value.exercises[2].setsState).isEqualTo(listOf(false, true))
+        with (sut.uiState.value) {
+            assertThat(exercises[0].original.load).isEqualTo(21)
+            assertThat(exercises[0].setsState).isEqualTo(listOf(true, false, false))
+            assertThat(exercises[1].original.sets).isEqualTo(4)
+            assertThat(exercises[1].setsState).isEqualTo(listOf(false, true, false, false))
+            assertThat(exercises[2].original.sets).isEqualTo(2)
+            assertThat(exercises[2].setsState).isEqualTo(listOf(false, true))
+        }
     }
 }
