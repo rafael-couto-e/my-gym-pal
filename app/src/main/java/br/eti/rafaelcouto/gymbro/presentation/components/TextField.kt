@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,6 +23,7 @@ import br.eti.rafaelcouto.gymbro.R
 fun TextField(
     value: String,
     label: String,
+    testTag: String = "textField",
     keyboardType: KeyboardType = KeyboardType.Text,
     capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     imeAction: ImeAction = ImeAction.Default,
@@ -28,6 +31,7 @@ fun TextField(
 ) {
     OutlinedTextField(
         modifier = Modifier
+            .semantics { this.testTag = testTag }
             .fillMaxWidth()
             .padding(
                 horizontal = dimensionResource(id = R.dimen.padding_m),

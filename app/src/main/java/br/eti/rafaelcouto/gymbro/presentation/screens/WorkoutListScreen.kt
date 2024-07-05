@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import br.eti.rafaelcouto.gymbro.R
@@ -69,6 +71,7 @@ fun WorkoutList(
         content = {
             items(collection = workouts) { workout ->
                 WorkoutItem(
+                    modifier = Modifier.semantics { testTag = "workout-${workout.id}" },
                     workout = workout,
                     onItemClick = onItemClick
                 )
@@ -80,6 +83,7 @@ fun WorkoutList(
 @Composable
 fun WorkoutItem(
     workout: Workout,
+    modifier: Modifier = Modifier,
     onItemClick: (Workout) -> Unit = {}
 ) {
     val (backgroundColor, fontWeight) = if (workout.isLast)
@@ -88,7 +92,7 @@ fun WorkoutItem(
         Color.Transparent to FontWeight.Normal
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(color = backgroundColor)
             .clickable { onItemClick(workout) },

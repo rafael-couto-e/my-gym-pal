@@ -6,7 +6,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -87,6 +90,7 @@ fun ExerciseFormScreen(
             topAppBarActions = {
                 if (state.exerciseId != 0L)
                     IconButton(
+                        modifier = Modifier.semantics { testTag = "deleteAction" },
                         onClick = {
                             onDeleteExerciseClicked()
                             showMessage(deleteExerciseMessage)

@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.eti.rafaelcouto.gymbro.R
@@ -95,6 +97,7 @@ fun ExerciseListScreen(
                 topAppBarActions = {
                     if (!state.shouldDisplayEmptyMessage)
                         IconButton(
+                            modifier = Modifier.semantics { testTag = "finishWorkoutButton" },
                             enabled = state.canFinishWorkout,
                             onClick = onFinishWorkout,
                             content = {
@@ -110,6 +113,7 @@ fun ExerciseListScreen(
                         onToggle = onMenuToggle
                     ) {
                         DropdownMenuItem(
+                            modifier = Modifier.semantics { testTag = "editAction" },
                             text = { Text(text = stringResource(id = R.string.edit)) },
                             onClick = {
                                 onEditWorkoutClick(state.workout.id)
@@ -117,6 +121,7 @@ fun ExerciseListScreen(
                             }
                         )
                         DropdownMenuItem(
+                            modifier = Modifier.semantics { testTag = "deleteAction" },
                             text = { Text(text = stringResource(id = R.string.delete)) },
                             onClick = {
                                 onDeleteWorkoutClicked()

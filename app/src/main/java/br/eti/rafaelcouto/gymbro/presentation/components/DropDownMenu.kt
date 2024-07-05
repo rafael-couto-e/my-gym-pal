@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import br.eti.rafaelcouto.gymbro.R
 
@@ -22,7 +24,10 @@ fun DropDownMenu(
     onToggle: (Boolean) -> Unit = {},
     items: @Composable ColumnScope.() -> Unit
 ) {
-    IconButton(onClick = { onToggle(!expanded) }) {
+    IconButton(
+        modifier = Modifier.semantics { testTag = "dropDownMenuButton" },
+        onClick = { onToggle(!expanded) }
+    ) {
         Icon(
             imageVector = Icons.Filled.MoreVert,
             contentDescription = stringResource(id = R.string.options)
@@ -30,7 +35,9 @@ fun DropDownMenu(
     }
 
     DropdownMenu(
-        modifier = Modifier.background(color = colorResource(id = R.color.lightGrey)),
+        modifier = Modifier
+            .semantics { testTag = "dropDownMenuContent" }
+            .background(color = colorResource(id = R.color.lightGrey)),
         expanded = expanded,
         onDismissRequest = { onToggle(false) },
         content = items

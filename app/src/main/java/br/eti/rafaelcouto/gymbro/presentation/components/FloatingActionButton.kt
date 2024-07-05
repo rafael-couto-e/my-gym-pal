@@ -5,8 +5,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import br.eti.rafaelcouto.gymbro.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -18,6 +21,7 @@ fun FloatingActionButton(
     onClick: () -> Unit = {}
 ) {
     FloatingActionButton(
+        modifier = Modifier.semantics { testTag = "fab" },
         onClick = onClick,
         containerColor = colorResource(id = R.color.colorPrimary),
         contentColor = colorResource(id = R.color.white),
