@@ -30,6 +30,7 @@ fun WorkoutFormScreen(
         },
         content = {
             TextField(
+                testTag = "workoutNameField",
                 value = state.workoutName,
                 label = stringResource(id = R.string.workout_name),
                 capitalization = KeyboardCapitalization.Words,

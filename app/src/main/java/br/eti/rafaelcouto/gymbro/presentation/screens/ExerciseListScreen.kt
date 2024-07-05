@@ -77,6 +77,7 @@ fun ExerciseListScreen(
     )
 
     LaunchedEffect(
+        Unit,
         state.workout,
         state.canFinishWorkout,
         state.isMenuExpanded,
@@ -191,6 +192,7 @@ fun ExerciseItem(
                 text = exercise.original.name
             )
             RoundedButton(
+                modifier = Modifier.semantics { testTag = "edit-${exercise.original.id}" },
                 onClick = {
                     onEditExerciseClick(exercise.original)
                 },
@@ -225,7 +227,9 @@ fun ExerciseItem(
                 text = setsAndReps
             )
             RoundedButton(
-                modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_m)),
+                modifier = Modifier
+                    .semantics { testTag = "decrease-${exercise.original.id}" }
+                    .padding(end = dimensionResource(id = R.dimen.padding_m)),
                 onClick = {
                     onDecreaseLoad(exercise.original)
                 },
@@ -237,6 +241,7 @@ fun ExerciseItem(
                 text = stringResource(id = R.string.load_kg, exercise.original.load)
             )
             RoundedButton(
+                modifier = Modifier.semantics { testTag = "increase-${exercise.original.id}" },
                 onClick = {
                     onIncreaseLoad(exercise.original)
                 },
@@ -263,7 +268,9 @@ fun ExerciseItem(
                         dimensionResource(id = R.dimen.padding_p)
 
                     Checkbox(
-                        modifier = Modifier.padding(start = paddingStart),
+                        modifier = Modifier
+                            .semantics { testTag = "exercise-${exercise.original.id}-set-$index" }
+                            .padding(start = paddingStart),
                         checked = value,
                         onCheckedChange = {
                             onSetFinished(exercise, index)

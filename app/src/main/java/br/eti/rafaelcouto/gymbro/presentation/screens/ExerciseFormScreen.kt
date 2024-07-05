@@ -41,6 +41,7 @@ fun ExerciseFormScreen(
         },
         content = {
             TextField(
+                testTag = "exerciseNameField",
                 value = state.exerciseName,
                 label = stringResource(id = R.string.exercise_name),
                 capitalization = KeyboardCapitalization.Words,
@@ -48,6 +49,7 @@ fun ExerciseFormScreen(
                 onValueChange = state.onExerciseNameChange
             )
             TextField(
+                testTag = "numberOfSetsField",
                 value = state.numberOfSets,
                 label = stringResource(id = R.string.number_of_sets),
                 keyboardType = KeyboardType.Number,
@@ -55,6 +57,7 @@ fun ExerciseFormScreen(
                 onValueChange = state.onNumberOfSetsChange
             )
             TextField(
+                testTag = "minRepsField",
                 value = state.minReps,
                 label = stringResource(id = R.string.min_reps),
                 keyboardType = KeyboardType.Number,
@@ -62,6 +65,7 @@ fun ExerciseFormScreen(
                 onValueChange = state.onMinRepsChange
             )
             TextField(
+                testTag = "maxRepsField",
                 value = state.maxReps,
                 label = stringResource(id = R.string.max_reps),
                 keyboardType = KeyboardType.Number,
@@ -69,6 +73,7 @@ fun ExerciseFormScreen(
                 onValueChange = state.onMaxRepsChange
             )
             TextField(
+                testTag = "loadField",
                 value = state.load,
                 label = stringResource(id = R.string.load),
                 keyboardType = KeyboardType.Number,
